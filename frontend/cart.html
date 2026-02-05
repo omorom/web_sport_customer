@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>ตะกร้าของฉัน | ระบบจองอุปกรณ์กีฬา</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+    <!-- CART STYLE -->
+    <link rel="stylesheet" href="css/cart.css">
+    <header class="main-header">
+
+        <div class="header-top">
+
+            <div class="brand">
+                <span class="brand-name">ระบบจองอุปกรณ์กีฬา</span>
+                <small>Sports Equipment Booking System</small>
+            </div>
+
+            <div class="user-zone">
+                <div class="badge orange" id="topPoints">⭐ - คะแนน</div>
+                <a class="badge purple" href="coupon.html">🎟 คูปอง</a>
+                <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+            </div>
+
+        </div>
+
+        <div class="header-bottom">
+            <nav class="main-nav">
+                <a href="index.html" class="nav-item active">เลือกอุปกรณ์</a>
+                <a href="my-bookings.html" class="nav-item">รายการจอง</a>
+                <a href="history.html" class="nav-item">ประวัติการเช่า</a>
+                <a href="history_point.html" class="nav-item">ประวัติการใช้แต้ม</a>
+                <a href="status_maintenance.html" class="nav-item">สถานะการซ่อม</a>
+            </nav>
+        </div>
+
+    </header>
+    <!-- ================= MAIN ================= -->
+
+    <div class="container">
+
+        <main class="content">
+
+            <!-- SUMMARY BAR -->
+            <div class="cart-summary">
+
+                <div class="cart-summary-left">
+                    วันที่: <strong id="cartDate">-</strong>
+                    <span class="sep">|</span>
+                    เวลา: <strong id="cartTime">-</strong>
+                    <span class="sep">|</span>
+                    จำนวนชั่วโมง: <strong id="cartHours">-</strong>
+                </div>
+
+                <div class="cart-summary-right">
+                    <strong id="cartCount">0</strong> รายการ
+                </div>
+
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div id="emptyCart" class="empty-cart">
+                <h3>ตะกร้าว่างเปล่า</h3>
+                <p>คุณยังไม่ได้เลือกสนามหรืออุปกรณ์</p>
+                <a href="index.html" class="primary-btn">
+                    เลือกอุปกรณ์ / สนาม
+                </a>
+            </div>
+
+            <!-- CART ITEMS -->
+            <div id="cartItems" class="cart-items hidden">
+                <h3>รายการที่เลือก</h3>
+            </div>
+
+            <!-- ACTION BAR -->
+            <div id="cartActions" class="cart-actions hidden">
+
+                <a href="index.html" class="secondary-btn">
+                    เลือกเพิ่ม
+                </a>
+
+                <button class="primary-btn" id="confirmBtn">
+                    ยืนยันการเช่า
+                </button>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="cart.js"></script>
+
+    </body>
+
+</html>

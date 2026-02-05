@@ -3,73 +3,66 @@ require_once "database.php";
 
 header("Content-Type: application/json");
 
-$branchId = $_GET["branch_id"] ?? null;
-$date     = $_GET["date"] ?? null;
-$time     = $_GET["time"] ?? null;
-$hours    = $_GET["hours"] ?? 3;
+$date  = $_GET["date"] ?? null;
+$time  = $_GET["time"] ?? null;
+$hours = intval($_GET["hours"] ?? 3);
 
-if (!$branchId || !$date || !$time) {
-    echo json_encode([
-        "success" => false,
-        "message" => "missing params"
-    ]);
-    exit;
+if (!$date || !$time) {
+  echo json_encode([
+    "success" => false,
+    "message" => "missing params"
+  ]);
+  exit;
 }
 
-/* ==========================
-   🔥 TIME RANGE USER WANT
-========================== */
+$dt =
+  DateTime::createFromFormat("d/m/Y H:i", "$date $time")
+  ?: DateTime::createFromFormat("d/m/Y H", "$date $time");
 
-$start = date("Y-m-d H:i:s", strtotime("$date $time"));
+if (!$dt) {
+  echo json_encode([
+    "success" => false,
+    "error" => "date parse failed",
+    "date" => $date,
+    "time" => $time
+  ]);
+  exit;
+}
+
+
+$start = $dt->format("Y-m-d H:i:s");
 $end   = date("Y-m-d H:i:s", strtotime("$start +$hours hour"));
 
-/* ==========================
-   MAIN QUERY
-========================== */
-
 $sql = "
-SELECT 
-    v.*,
-
-    CASE 
-        WHEN EXISTS (
-            SELECT 1
-            FROM booking b
-            JOIN booking_detail bd 
-                ON b.booking_id = bd.booking_id
-            WHERE 
-                bd.venue_id = v.venue_id
-                AND bd.item_type = 'venue'
-                AND b.status_id = 4
-                AND (
-                    b.pickup_time < '$end'
-                    AND b.due_return_time > '$start'
-                )
-        )
-        THEN 0
-        ELSE 1
-    END AS is_available
-
-FROM venues v
-WHERE v.branch_id = '$branchId'
-  AND v.is_active = 1
+SELECT DISTINCT bd.venue_id
+FROM bookings b
+JOIN booking_details bd
+  ON b.booking_id = bd.booking_id
+WHERE
+  bd.item_type = 'venue'
+  AND b.status_id IN (3,4)
+  AND (
+    b.pickup_time < ?
+    AND b.due_return_time > ?
+  )
 ";
 
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ss", $end, $start);
+$stmt->execute();
 
-$data = [];
+$result = $stmt->get_result();
+
+$unavailable = [];
 
 while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
+  $unavailable[] = $row["venue_id"];
 }
 
 echo json_encode([
-    "success" => true,
-    "data" => $data,
-    "requested" => [
-        "start" => $start,
-        "end" => $end
-    ]
+  "success" => true,
+  "unavailable_ids" => $unavailable
 ]);
 
+$stmt->close();
 $conn->close();
