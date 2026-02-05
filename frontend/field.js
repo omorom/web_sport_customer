@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-    var _a;
     console.log("field.ts loaded");
+    updateCartCount();
     // ============================
     // STATE
     // ============================
@@ -17,51 +17,17 @@ document.addEventListener("DOMContentLoaded", function () {
     var categoryBox = document.getElementById("categoryList");
     var venueGrid = document.getElementById("venueGrid");
     var searchInput = document.getElementById("searchInput");
-    // ===== PRICE (เหมือนหน้า index) =====
-    var minPriceInput = document.getElementById("minPriceInput");
-    var maxPriceInput = document.getElementById("maxPriceInput");
-    var priceMinRange = document.getElementById("priceMin");
-    var priceMaxRange = document.getElementById("priceMax");
-    // ===== POINT =====
-    var pointEl = document.getElementById("topPoints");
     // ============================
-    // LOAD USER POINTS
+    // PROFILE
     // ============================
     fetch("/sports_rental_system/api/get_profile.php")
         .then(function (res) { return res.json(); })
         .then(function (data) {
-        var _a, _b, _c;
-        console.log("user data:", data);
-        var points = (_c = (_a = data.points) !== null && _a !== void 0 ? _a : (_b = data.data) === null || _b === void 0 ? void 0 : _b.points) !== null && _c !== void 0 ? _c : data.current_points;
-        if (pointEl && points !== undefined) {
-            pointEl.textContent = "\u2B50 ".concat(points, " \u0E04\u0E30\u0E41\u0E19\u0E19");
+        var pointEl = document.getElementById("topPoints");
+        if (pointEl && data.points !== undefined) {
+            pointEl.textContent = "\u2B50 ".concat(data.points, " \u0E04\u0E30\u0E41\u0E19\u0E19");
         }
-    })
-        .catch(function (err) { return console.error("user fetch error:", err); });
-    // ============================
-    // RESTORE SHARED STATE
-    // ============================
-    var savedDate = localStorage.getItem("rentDate");
-    var savedTime = localStorage.getItem("timeSlot");
-    var savedHours = localStorage.getItem("rentHours");
-    var savedMin = localStorage.getItem("minPrice");
-    var savedMax = localStorage.getItem("maxPrice");
-    if (savedDate && dateInput)
-        dateInput.value = savedDate;
-    if (savedHours && hourInput) {
-        hourInput.value = savedHours;
-        document.querySelectorAll(".duration-btn")
-            .forEach(function (b) { return b.classList.remove("active"); });
-        (_a = document.querySelector(".duration-btn[data-hour=\"".concat(savedHours, "\"]"))) === null || _a === void 0 ? void 0 : _a.classList.add("active");
-    }
-    if (savedMin && minPriceInput && priceMinRange) {
-        minPriceInput.value = savedMin;
-        priceMinRange.value = savedMin;
-    }
-    if (savedMax && maxPriceInput && priceMaxRange) {
-        maxPriceInput.value = savedMax;
-        priceMaxRange.value = savedMax;
-    }
+    });
     // ============================
     // LOAD BRANCH
     // ============================
@@ -79,34 +45,8 @@ document.addEventListener("DOMContentLoaded", function () {
             branchLabel.textContent = data.name;
         if (timeSlot) {
             generateTimeSlots(data.open_time, data.close_time);
-            if (savedTime)
-                timeSlot.value = savedTime;
         }
         loadVenues();
-    });
-    // ============================
-    // SAVE DATE / TIME
-    // ============================
-    dateInput === null || dateInput === void 0 ? void 0 : dateInput.addEventListener("change", function () {
-        localStorage.setItem("rentDate", dateInput.value);
-    });
-    timeSlot === null || timeSlot === void 0 ? void 0 : timeSlot.addEventListener("change", function () {
-        localStorage.setItem("timeSlot", timeSlot.value);
-    });
-    // ============================
-    // DURATION
-    // ============================
-    document.querySelectorAll(".duration-btn")
-        .forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            document.querySelectorAll(".duration-btn")
-                .forEach(function (b) { return b.classList.remove("active"); });
-            btn.classList.add("active");
-            var h = btn.dataset.hour || "3";
-            if (hourInput)
-                hourInput.value = h;
-            localStorage.setItem("rentHours", h);
-        });
     });
     // ============================
     // SEARCH
@@ -114,37 +54,6 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput === null || searchInput === void 0 ? void 0 : searchInput.addEventListener("input", function () {
         searchKeyword = searchInput.value.trim();
         loadVenues();
-    });
-    // ============================
-    // PRICE SYNC (เหมือนหน้า index)
-    // ============================
-    function syncPrice() {
-        if (!minPriceInput ||
-            !maxPriceInput ||
-            !priceMinRange ||
-            !priceMaxRange)
-            return;
-        var min = Number(priceMinRange.value);
-        var max = Number(priceMaxRange.value);
-        if (min > max)
-            min = max;
-        minPriceInput.value = min.toString();
-        maxPriceInput.value = max.toString();
-        localStorage.setItem("minPrice", min.toString());
-        localStorage.setItem("maxPrice", max.toString());
-        loadVenues();
-    }
-    priceMinRange === null || priceMinRange === void 0 ? void 0 : priceMinRange.addEventListener("input", syncPrice);
-    priceMaxRange === null || priceMaxRange === void 0 ? void 0 : priceMaxRange.addEventListener("input", syncPrice);
-    minPriceInput === null || minPriceInput === void 0 ? void 0 : minPriceInput.addEventListener("change", function () {
-        if (priceMinRange)
-            priceMinRange.value = minPriceInput.value;
-        syncPrice();
-    });
-    maxPriceInput === null || maxPriceInput === void 0 ? void 0 : maxPriceInput.addEventListener("change", function () {
-        if (priceMaxRange)
-            priceMaxRange.value = maxPriceInput.value;
-        syncPrice();
     });
     // ============================
     // LOAD CATEGORIES
@@ -157,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
         categoryBox.innerHTML = "";
         res.data.forEach(function (cat) {
             var label = document.createElement("label");
-            label.innerHTML = "\n        <input type=\"checkbox\" value=\"".concat(cat.category_id, "\">\n        <span>").concat(cat.name, "</span>\n      ");
+            label.innerHTML = "\n          <input type=\"checkbox\" value=\"".concat(cat.category_id, "\">\n          <span>").concat(cat.name, "</span>\n        ");
             var checkbox = label.querySelector("input");
             checkbox.addEventListener("change", function () {
                 var id = checkbox.value;
@@ -168,12 +77,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     selectedCategories =
                         selectedCategories.filter(function (c) { return c !== id; });
                 }
-                loadVenues(); // 🔥 refresh list
+                loadVenues();
             });
             categoryBox.appendChild(label);
         });
-    })
-        .catch(function (err) { return console.error("category fetch error:", err); });
+    });
     // ============================
     // LOAD VENUES
     // ============================
@@ -187,12 +95,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (searchKeyword !== "") {
             params.set("q", searchKeyword);
-        }
-        if (minPriceInput === null || minPriceInput === void 0 ? void 0 : minPriceInput.value) {
-            params.set("min_price", minPriceInput.value);
-        }
-        if (maxPriceInput === null || maxPriceInput === void 0 ? void 0 : maxPriceInput.value) {
-            params.set("max_price", maxPriceInput.value);
         }
         venueGrid.innerHTML =
             "<p class=\"loading-text\">\u0E01\u0E33\u0E25\u0E31\u0E07\u0E42\u0E2B\u0E25\u0E14\u0E2A\u0E19\u0E32\u0E21...</p>";
@@ -211,15 +113,146 @@ document.addEventListener("DOMContentLoaded", function () {
                 var img = item.image_url && item.image_url !== ""
                     ? item.image_url
                     : "images/no-image.png";
-                card.innerHTML = "\n            <img src=\"".concat(img, "\">\n            <h5>").concat(item.name, "</h5>\n            <p>").concat(item.price_per_hour, " \u0E1A\u0E32\u0E17 / \u0E0A\u0E21.</p>\n          ");
+                var qty = getFieldQty(item.venue_id);
+                card.innerHTML = "\n            <img src=\"".concat(img, "\">\n            <h5 class=\"name\">").concat(item.name, "</h5>\n            <p class=\"price\">").concat(item.price_per_hour, " \u0E1A\u0E32\u0E17 / \u0E0A\u0E21.</p>\n\n            <div class=\"card-qty-controls\">\n              <button class=\"qty-minus\">\u2212</button>\n              <span class=\"qty-num\">").concat(qty, "</span>\n              <button class=\"qty-plus\">+</button>\n            </div>\n          ");
+                if (qty > 0) {
+                    card.classList.add("selected");
+                }
+                var plusBtn = card.querySelector(".qty-plus");
+                var minusBtn = card.querySelector(".qty-minus");
+                plusBtn.addEventListener("click", function () {
+                    var date = dateInput === null || dateInput === void 0 ? void 0 : dateInput.value;
+                    var time = timeSlot === null || timeSlot === void 0 ? void 0 : timeSlot.value;
+                    var hours = hourInput === null || hourInput === void 0 ? void 0 : hourInput.value;
+                    if (!date || !time || !hours) {
+                        alert("กรุณาเลือกวันที่ เวลา และจำนวนชั่วโมงก่อน");
+                        return;
+                    }
+                    increaseField(item, date, time, hours);
+                    updateFieldCard(card, item.venue_id);
+                });
+                minusBtn.addEventListener("click", function () {
+                    decreaseField(item);
+                    updateFieldCard(card, item.venue_id);
+                });
                 venueGrid.appendChild(card);
             });
         });
     }
 });
-// ===============================
+// ============================
+// CART HELPERS
+// ============================
+function getCart() {
+    try {
+        var raw = localStorage.getItem("cart");
+        if (!raw)
+            return [];
+        var parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+            ? parsed
+            : [];
+    }
+    catch (_a) {
+        return [];
+    }
+}
+// ============================
+// FIELD QTY
+// ============================
+function getFieldQty(id) {
+    var cart = getCart();
+    for (var i = 0; i < cart.length; i++) {
+        if (cart[i].type === "field" &&
+            String(cart[i].id) === String(id)) {
+            return cart[i].qty;
+        }
+    }
+    return 0;
+}
+// ============================
+// ADD FIELD (MAX 1)
+// ============================
+function increaseField(field, date, time, hours) {
+    var cart = getCart();
+    var index = -1;
+    for (var i = 0; i < cart.length; i++) {
+        if (cart[i].type === "field" &&
+            String(cart[i].id) ===
+                String(field.venue_id)) {
+            index = i;
+            break;
+        }
+    }
+    if (index !== -1) {
+        alert("สนามนี้เลือกได้เพียง 1 สนามเท่านั้น");
+        return;
+    }
+    cart.push({
+        id: String(field.venue_id),
+        type: "field",
+        name: field.name,
+        price: field.price_per_hour,
+        qty: 1,
+        image: field.image_url,
+        date: date,
+        time: time,
+        hours: hours
+    });
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+// ============================
+// REMOVE FIELD
+// ============================
+function decreaseField(field) {
+    var cart = getCart();
+    var index = -1;
+    for (var i = 0; i < cart.length; i++) {
+        if (cart[i].type === "field" &&
+            String(cart[i].id) ===
+                String(field.venue_id)) {
+            index = i;
+            break;
+        }
+    }
+    if (index === -1)
+        return;
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+// ============================
+// UPDATE FIELD CARD
+// ============================
+function updateFieldCard(card, id) {
+    var qty = getFieldQty(id);
+    var qtyText = card.querySelector(".qty-num");
+    qtyText.textContent =
+        qty.toString();
+    if (qty > 0) {
+        card.classList.add("selected");
+    }
+    else {
+        card.classList.remove("selected");
+    }
+    updateCartCount();
+}
+// ============================
+// UPDATE CART COUNT
+// ============================
+function updateCartCount() {
+    var badge = document.getElementById("cartCount");
+    if (!badge)
+        return;
+    var cart = getCart();
+    var total = 0;
+    for (var i = 0; i < cart.length; i++) {
+        total += Number(cart[i].qty) || 0;
+    }
+    badge.textContent = total.toString();
+}
+// ============================
 // GENERATE TIME SLOTS
-// ===============================
+// ============================
 function generateTimeSlots(openTime, closeTime) {
     var select = document.getElementById("timeSlot");
     if (!select)

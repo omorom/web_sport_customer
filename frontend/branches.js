@@ -176,6 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (e.target.name === "province") {
+      loadProvinces(e.target.value);
       loadBranches();
     }
 

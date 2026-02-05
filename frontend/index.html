@@ -13,12 +13,11 @@
   <link rel="stylesheet" href="css/equipment.css" />
 </head>
 
-<body>
+<body id="equipmentPage">
 
   <!-- ================= HEADER ================= -->
   <header class="main-header">
 
-    <!-- TOP -->
     <div class="header-top">
 
       <div class="brand">
@@ -32,32 +31,25 @@
         <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
       </div>
 
-
     </div>
 
-    <!-- TAB BAR -->
     <div class="header-bottom">
       <nav class="main-nav">
-
         <a href="index.html" class="nav-item active">เลือกอุปกรณ์</a>
         <a href="my-bookings.html" class="nav-item">รายการจอง</a>
         <a href="history.html" class="nav-item">ประวัติการเช่า</a>
         <a href="history_point.html" class="nav-item">ประวัติการใช้แต้ม</a>
         <a href="status_maintenance.html" class="nav-item">สถานะการซ่อม</a>
-
       </nav>
     </div>
 
-    <!-- BOOKING BAR -->
     <div class="booking-bar">
       <div class="booking-inner">
 
-        <!-- LEFT : BRANCH -->
         <a class="branch-display" href="branches.html">
           📍 สาขา: <strong id="selectedBranch"></strong>
         </a>
 
-        <!-- RIGHT : BUTTONS -->
         <div class="booking-actions">
           <a href="index.html" class="booking-btn active">จองอุปกรณ์</a>
           <a href="field-booking.html" class="booking-btn">จองสนาม</a>
@@ -65,7 +57,6 @@
 
       </div>
     </div>
-
 
   </header>
 
@@ -76,48 +67,29 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
 
-      <!-- DATE -->
       <section class="filter-block">
         <h4>วันที่ต้องการเช่า</h4>
-
         <input type="text" id="rentDate" class="calendar-input" placeholder="เลือกวันที่" />
       </section>
 
-      <!-- TIME -->
       <section class="filter-block">
         <h4>ช่วงเวลา</h4>
-
         <select id="timeSlot" class="time-select">
           <option value="">-- เลือกช่วงเวลา --</option>
         </select>
       </section>
-      <div class="duration-box">
 
+      <div class="duration-box">
         <button class="duration-btn" data-hour="1">1 ชม.</button>
         <button class="duration-btn" data-hour="2">2 ชม.</button>
-        <button class="duration-btn active" data-hour="3">
-          3 ชม.
-        </button>
-        <button class="duration-btn" data-hour="4">
-          4 ชม.
-          <small>+10 บาท</small>
-        </button>
-        <button class="duration-btn" data-hour="5">
-          5 ชม.
-          <small>+20 บาท</small>
-        </button>
-
-        <button class="duration-btn" data-hour="6">
-          6 ชม.
-          <small>+30 บาท</small>
-        </button>
-
+        <button class="duration-btn active" data-hour="3">3 ชม.</button>
+        <button class="duration-btn" data-hour="4">4 ชม.<small>+10 บาท</small></button>
+        <button class="duration-btn" data-hour="5">5 ชม.<small>+20 บาท</small></button>
+        <button class="duration-btn" data-hour="6">6 ชม.<small>+30 บาท</small></button>
       </div>
 
       <input type="hidden" id="rentHours" value="3">
 
-
-      <!-- CATEGORY -->
       <section class="filter-block">
         <h4>หมวดกีฬา</h4>
         <div class="checkbox-group" id="categoryList">
@@ -125,12 +97,10 @@
         </div>
       </section>
 
-      <!-- PRICE -->
       <section class="filter-block">
         <h4>ช่วงราคา (บาท/ชม.)</h4>
 
         <div class="price-range-box">
-
           <div class="price-inputs">
             <input type="number" id="minPriceInput" placeholder="ต่ำสุด" min="0" />
             <span>-</span>
@@ -138,12 +108,8 @@
           </div>
 
           <input type="range" id="priceMin" min="0" max="500" value="0" />
-
           <input type="range" id="priceMax" min="0" max="500" value="500" />
-
         </div>
-      </section>
-
       </section>
 
     </aside>
@@ -155,11 +121,11 @@
 
         <div class="search-box">
           <input type="text" id="searchInput" placeholder="ค้นหาอุปกรณ์..." />
-
         </div>
 
         <a href="cart.html" class="cart-btn">
           🛒 ตะกร้า
+          <span class="cart-count" id="cartCount">0</span>
         </a>
 
       </div>
@@ -168,36 +134,49 @@
         <p class="loading-text">กำลังโหลดอุปกรณ์...</p>
       </div>
 
-
     </main>
 
   </div>
 
   <!-- ================= SCRIPTS ================= -->
-  <script src="index.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
   <script>
-    id = "equipmentGrid";
     const today = new Date();
-
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
 
     flatpickr("#rentDate", {
       locale: "th",
       dateFormat: "d/m/Y",
-
-      // ให้เลือกได้แค่วันนี้กับพรุ่งนี้
-      enable: [
-        today,
-        tomorrow
-      ]
+      enable: [today, tomorrow]
     });
-
   </script>
+
+  <!-- โหลด index.js ท้ายสุด -->
+  <script src="index.js"></script>
+  <!-- TEMPLATE FOR EQUIPMENT CARD -->
+<template id="equipmentCardTemplate">
+  <div class="equipment-card">
+
+    <img src="">
+    <h5 class="name"></h5>
+    <p class="price"></p>
+
+    <div class="card-qty-controls">
+      <button class="qty-minus">−</button>
+      <span class="qty-num">0</span>
+      <button class="qty-plus">+</button>
+    </div>
+
+    <span class="stock"></span>
+
+  </div>
+</template>
+
+
 
 </body>
 
