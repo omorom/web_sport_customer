@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.removeItem("minPrice");
         localStorage.removeItem("maxPrice");
         // // ถ้าอยาก clear field ใน cart ด้วย
-        // clearFieldInCart();
+        clearEquipmentInCart();
         // ===== reload =====
         loadEquipment();
     });

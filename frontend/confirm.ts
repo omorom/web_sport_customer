@@ -1,22 +1,51 @@
+console.log("🔥 CONFIRM TS VERSION OK 🔥");
+
 let USER_POINTS = 0;
 let usedPoints = 0;
 let couponDiscount = 0;
+let couponCode: string | null = null;
 
-// 🔵 baseTotal = ของใน cart อย่างเดียว
-let baseTotal = 0;
-
-// 🔵 ค่าชั่วโมงเพิ่ม
+let equipmentTotal = 0;
+let fieldTotal = 0;
 let extraHourFee = 0;
+
+let selectedBranchId: string | null = null;
+
+const BASE_HOURS = 3;
 
 document.addEventListener("DOMContentLoaded", () => {
     loadProfile();
     loadBookingInfo();
     renderItems();
-    calcBaseTotal();
+    calcTotals();
     bindPointControls();
     bindCoupon();
     bindSubmit();
+    loadBranch();
 });
+
+/* ===============================
+   LOAD BRANCH
+================================ */
+
+function loadBranch(): void {
+
+    fetch("/sports_rental_system/api/get_selected_branch.php")
+        .then(res => res.json())
+        .then(res => {
+
+            if (!res || res.success === false) {
+                window.location.href = "branches.html";
+                return;
+            }
+
+            const data = res.data ?? res;
+
+            selectedBranchId = data.branch_id;
+
+            localStorage.setItem("branchId", data.branch_id);
+        });
+}
 
 /* ===============================
    LOAD USER
@@ -35,9 +64,7 @@ function loadProfile(): void {
 
             const user = document.getElementById("userPoints");
             if (user) user.textContent = USER_POINTS.toString();
-
         });
-
 }
 
 /* ===============================
@@ -48,41 +75,23 @@ function loadBookingInfo(): void {
 
     const date = localStorage.getItem("rentDate");
     const time = localStorage.getItem("timeSlot");
-    const hours = Number(localStorage.getItem("rentHours") || 0);
+    const hours = Number(localStorage.getItem("rentHours") || 1);
 
     const dateEl = document.getElementById("confirmDate");
     if (dateEl) dateEl.textContent = date || "-";
 
     const timeEl = document.getElementById("confirmTime");
 
-    if (timeEl) {
+    if (timeEl && time && hours) {
 
-        if (time && hours) {
+        const s = Number(time);
+        const e = s + hours;
 
-            const s = Number(time);
-            const e = s + hours;
-
-            timeEl.textContent =
-                `${pad(s)}:00 - ${pad(e)}:00`;
-
-        } else if (time) {
-
-            timeEl.textContent = `${time}:00`;
-
-        } else {
-
-            timeEl.textContent = "-";
-
-        }
-
+        timeEl.textContent = `${pad(s)}:00 - ${pad(e)}:00`;
     }
 
     const hoursEl = document.getElementById("confirmHours");
-    if (hoursEl) {
-        hoursEl.textContent =
-            hours ? hours.toString() : "-";
-    }
-
+    if (hoursEl) hoursEl.textContent = hours.toString();
 }
 
 /* ===============================
@@ -95,136 +104,86 @@ function renderItems(): void {
     if (!box) return;
 
     const cart = getCart();
+    const hours = Number(localStorage.getItem("rentHours") || 1);
 
     box.innerHTML = "";
 
-    let totalQty = 0;
-
     cart.forEach((item: any) => {
 
-        totalQty += Number(item.qty) || 0;
+        const price = Number(item.price || 0);
+        const qty = Number(item.qty || 1);
+
+        const perHourTotal = price * qty;
+        const total = perHourTotal * hours;
 
         const row = document.createElement("div");
         row.className = "confirm-item";
 
-        const img = item.image || "images/no-image.png";
+        const imgHtml =
+            item.image && item.image !== "null"
+                ? `<img src="${item.image.trim()}" alt="">`
+                : "";
 
         row.innerHTML = `
-            <img src="${img}" alt="${item.name}">
+            ${imgHtml}
+
             <div class="confirm-item-info">
                 <h4>${item.name}</h4>
-                <small>${item.type === "field" ? "สนาม" : "อุปกรณ์"}</small>
+                <small>${isField(item.type) ? "สนาม" : "อุปกรณ์"}</small>
             </div>
+
             <div class="confirm-item-qty">
-                x<strong>${item.qty}</strong>
+                x<strong>${qty}</strong>
             </div>
+
             <div class="confirm-item-price">
-                <strong>${item.price * item.qty} บาท</strong>
+                <div class="per-hour">
+                    ${perHourTotal} บาท / ชม.
+                </div>
+                <strong>
+                    ${perHourTotal} × ${hours} = ${total} บาท
+                </strong>
             </div>
         `;
 
         box.appendChild(row);
-
     });
-
-    const countEl = document.getElementById("itemCount");
-    if (countEl) countEl.textContent = totalQty.toString();
-
 }
 
 /* ===============================
-   TOTAL
-================================ */
-
-function calcExtraHourFee(hours: number): number {
-
-    if (hours === 4) return 100;
-    if (hours === 5) return 200;
-    if (hours === 6) return 300;
-
-    return 0; // 1–3 ชม.
-}
-
-function calcBaseTotal(): void {
-
-    baseTotal = 0;
-
-    const cart = getCart();
-
-    cart.forEach((i: any) => {
-        baseTotal += i.price * i.qty;
-    });
-
-    const hours =
-        Number(localStorage.getItem("rentHours") || 0);
-
-    extraHourFee =
-        calcExtraHourFee(hours);
-
-    updateTotals();
-}
-
-/* ===============================
-   UPDATE TOTAL DISPLAY
-================================ */
-
-function updateTotals(): void {
-
-    const gross =
-        baseTotal + extraHourFee;
-
-    const net =
-        Math.max(
-            gross -
-            usedPoints -
-            couponDiscount,
-            0
-        );
-
-    document.getElementById("baseTotal")!.textContent =
-        gross + " บาท";
-
-    document.getElementById("pointDiscount")!.textContent =
-        usedPoints.toString();
-
-    document.getElementById("couponDiscount")!.textContent =
-        couponDiscount.toString();
-
-    document.getElementById("netTotal")!.textContent =
-        net + " บาท";
-
-    document.getElementById("earnPoints")!.textContent =
-        Math.floor(gross / 100).toString();
-
-}
-
-/* ===============================
-    POINT CONTROL
+   POINT CONTROL
 ================================ */
 
 function bindPointControls(): void {
 
     const input =
-        document.getElementById("usePointInput") as HTMLInputElement;
+        document.getElementById("usePointInput") as HTMLInputElement | null;
 
     if (!input) return;
 
-    const getGross = () => baseTotal + extraHourFee;
+    const getGross = () =>
+        equipmentTotal +
+        fieldTotal +
+        extraHourFee;
+
+    const getMaxUsablePoints = () =>
+        Math.max(
+            getGross() - couponDiscount,
+            0
+        );
 
     document.getElementById("plusPoint")
         ?.addEventListener("click", () => {
 
             if (
                 usedPoints < USER_POINTS &&
-                usedPoints < getGross()
+                usedPoints < getMaxUsablePoints()
             ) {
 
                 usedPoints++;
                 input.value = usedPoints.toString();
                 updateTotals();
-
             }
-
         });
 
     document.getElementById("minusPoint")
@@ -235,24 +194,21 @@ function bindPointControls(): void {
                 usedPoints--;
                 input.value = usedPoints.toString();
                 updateTotals();
-
             }
-
         });
 
     document.getElementById("useMaxPoint")
         ?.addEventListener("click", () => {
 
             usedPoints =
-                Math.min(USER_POINTS, getGross());
+                Math.min(
+                    USER_POINTS,
+                    getMaxUsablePoints()
+                );
 
-            input.value =
-                usedPoints.toString();
-
+            input.value = usedPoints.toString();
             updateTotals();
-
         });
-
 }
 
 /* ===============================
@@ -261,80 +217,154 @@ function bindPointControls(): void {
 
 function bindCoupon(): void {
 
-    const btn = document.getElementById("applyCoupon");
-    if (!btn) return;
+    document.getElementById("applyCoupon")
+        ?.addEventListener("click", () => {
 
-    btn.addEventListener("click", () => {
+            const input =
+                document.getElementById("couponInput") as HTMLInputElement | null;
 
-        const input =
-            document.getElementById("couponInput") as HTMLInputElement;
+            if (!input) return;
 
-        if (!input) return;
+            const code = input.value.trim();
+            if (!code) return;
 
-        const code = input.value.trim();
-        if (!code) return;
+            const gross =
+                equipmentTotal +
+                fieldTotal +
+                extraHourFee;
 
-        const gross =
-            baseTotal + extraHourFee;
-
-        const cart = getCart(); // 🔥 สำคัญมาก
-
-        fetch("/sports_rental_system/api/check_coupon.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                code: code,
-                total: gross,
-                cart: cart
+            fetch("/sports_rental_system/api/check_coupon.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    code,
+                    total: gross,
+                    cart: getCart()
+                })
             })
-        })
-            .then(r => r.json())
-            .then((res: any) => {
+                .then(r => r.json())
+                .then((res: any) => {
 
-                const msg =
-                    document.getElementById("couponMsg");
+                    const msg =
+                        document.getElementById("couponMsg");
 
-                if (!msg) return;
+                    if (!res.success) {
 
-                if (!res.success) {
+                        if (msg) {
+                            msg.textContent = res.message;
+                            msg.className = "msg error";
+                        }
 
-                    msg.textContent = res.message;
-                    msg.className = "msg error";
+                        couponDiscount = 0;
+                        couponCode = null;
+                        updateTotals();
+                        return;
+                    }
 
-                    couponDiscount = 0;
+                    if (res.type === "percent") {
+
+                        couponDiscount =
+                            Math.floor(
+                                gross *
+                                Number(res.discount) / 100
+                            );
+
+                    } else {
+
+                        couponDiscount =
+                            Number(res.discount || 0);
+                    }
+
+                    couponCode = code;
+
+                    if (msg) {
+                        msg.textContent =
+                            `ใช้คูปองสำเร็จ ลด ${couponDiscount} บาท`;
+                        msg.className = "msg success";
+                    }
+
                     updateTotals();
-                    return;
-                }
+                });
+        });
+}
 
-                if (res.type === "percent") {
+/* ===============================
+   TOTAL CALC
+================================ */
 
-                    couponDiscount =
-                        Math.floor(
-                            gross *
-                            Number(res.discount) / 100
-                        );
+function calcTotals(): void {
 
-                } else {
+    equipmentTotal = 0;
+    fieldTotal = 0;
 
-                    couponDiscount =
-                        Number(res.discount || 0);
+    const cart = getCart();
+    const hours = Number(localStorage.getItem("rentHours") || 1);
 
-                }
+    cart.forEach((i: any) => {
 
-                msg.textContent =
-                    `ใช้คูปองสำเร็จ ลด ${couponDiscount} บาท`;
+        const price = Number(i.price || 0);
+        const qty = Number(i.qty || 1);
 
-                msg.className =
-                    "msg success";
+        const subtotal =
+            price *
+            qty *
+            hours;
 
-                updateTotals();
-            });
-
+        if (isField(i.type)) {
+            fieldTotal += subtotal;
+        } else {
+            equipmentTotal += subtotal;
+        }
     });
 
+    extraHourFee = calcExtraHourFee(hours);
+
+    updateTotals();
 }
+
+function calcExtraHourFee(hours: number): number {
+
+    if (hours <= 3) return 0;
+    if (hours === 4) return 100;
+    if (hours === 5) return 200;
+    if (hours >= 6) return 300;
+
+    return 0;
+}
+
+/* ===============================
+   UPDATE TOTAL UI
+================================ */
+
+function updateTotals(): void {
+
+    const gross =
+        equipmentTotal +
+        fieldTotal +
+        extraHourFee;
+
+    const net =
+        Math.max(
+            gross -
+            usedPoints -
+            couponDiscount,
+            0
+        );
+
+    setText("equipmentTotal", equipmentTotal + " บาท");
+    setText("fieldTotal", fieldTotal + " บาท");
+    setText("extraHourFee", extraHourFee + " บาท");
+    setText("pointDiscount", usedPoints.toString());
+    setText("couponDiscount", couponDiscount.toString());
+    setText("netTotal", net + " บาท");
+
+    // ✅ ใช้ net ให้ตรง backend
+    setText("earnPoints", Math.floor(net / 100).toString());
+}
+
 /* ===============================
    SUBMIT
 ================================ */
@@ -344,12 +374,75 @@ function bindSubmit(): void {
     document.getElementById("payBtn")
         ?.addEventListener("click", () => {
 
-            alert(
-                "🚀 ส่งข้อมูล booking ไป backend ต่อได้แล้ว"
+            const ok = confirm(
+                "เมื่อกดยืนยัน ระบบจะทำการจองรายการ และให้ดำเนินการชำระเงินทันที\n\nต้องการดำเนินการต่อหรือไม่?"
             );
 
-        });
+            if (!ok) return;
 
+            const branchId = localStorage.getItem("branchId");
+
+            if (!branchId) {
+                alert("❌ กรุณาเลือกสาขาก่อนทำการจอง");
+                window.location.href = "branches.html";
+                return;
+            }
+
+            let rawDate = localStorage.getItem("rentDate");
+
+            if (rawDate && rawDate.indexOf("/") !== -1) {
+                const parts = rawDate.split("/");
+                rawDate =
+                    parts[2] + "-" +
+                    parts[1] + "-" +
+                    parts[0];
+            }
+
+            const timeSlotRaw = localStorage.getItem("timeSlot");
+
+            if (!rawDate || !timeSlotRaw) {
+                alert("❌ ข้อมูลวันหรือเวลาไม่ครบ");
+                return;
+            }
+
+            const payload = {
+                branchId,
+                rentDate: rawDate,
+                timeSlot: Number(timeSlotRaw), // ✅ cast เป็น number
+                rentHours: Number(localStorage.getItem("rentHours") || 1),
+                usedPoints,
+                couponDiscount,
+                couponCode,
+                cart: getCart()
+            };
+
+            console.log("🚀 CREATE BOOKING PAYLOAD =>", payload);
+
+            fetch("/sports_rental_system/api/create_booking.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify(payload)
+            })
+                .then(r => r.json())
+                .then((data: any) => {
+
+                    if (!data.success) {
+                        alert("❌ ไม่สามารถสร้างการจองได้: " + data.message);
+                        return;
+                    }
+
+                    window.location.href =
+                        `payment.html?code=${data.booking_code}`;
+                })
+                .catch(err => {
+
+                    console.error(err);
+                    alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+                });
+        });
 }
 
 /* ===============================
@@ -358,19 +451,26 @@ function bindSubmit(): void {
 
 function getCart(): any[] {
 
-    const raw =
-        localStorage.getItem("cart");
+    const raw = localStorage.getItem("cart");
 
-    return raw
-        ? JSON.parse(raw)
-        : [];
-
+    return raw ? JSON.parse(raw) : [];
 }
 
 function pad(n: number): string {
 
-    return n < 10
-        ? "0" + n
-        : n.toString();
+    return n < 10 ? "0" + n : n.toString();
+}
 
+function setText(id: string, value: string): void {
+
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+}
+
+function isField(type: string): boolean {
+
+    return (
+        type === "field" ||
+        type === "สนาม"
+    );
 }

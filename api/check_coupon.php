@@ -237,8 +237,8 @@ if (!empty($coupon["per_user_daily_limit"])) {
         SELECT COUNT(*) c
         FROM coupon_usages
         WHERE coupon_code = ?
-          AND customer_id = ?
-          AND DATE(used_at) = ?
+        AND customer_id = ?
+        AND DATE(used_at) = ?
     ");
     $stmt->bind_param(
         "sss",

@@ -1,0 +1,301 @@
+* {
+    box-sizing: border-box;
+    font-family: "Noto Sans Thai", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f5f7fa;
+}
+
+/* ================= HEADER ================= */
+
+.main-header {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* TOP ROW */
+
+.header-top {
+    max-width: 1400px;
+    margin: auto;
+    padding: 14px 26px 10px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* BRAND */
+
+.brand {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-name {
+    color: #ff7a00;
+    font-weight: 700;
+    font-size: 17px;
+}
+
+.brand small {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+/* USER */
+
+.user-zone {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.badge {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge.orange {
+    background: #fff3e6;
+    color: #ff7a00;
+}
+
+.badge.purple {
+    background: #f3e8ff;
+    color: #7c3aed;
+    text-decoration: none;
+}
+
+.profile-btn {
+    background: #f3f4f6;
+    padding: 6px 14px;
+    border-radius: 999px;
+    text-decoration: none;
+    color: #111827;
+    font-size: 13px;
+}
+
+/* BOTTOM ROW */
+
+.header-bottom {
+    border-top: 1px solid #f0f0f0;
+}
+
+.header-bottom .main-nav {
+    max-width: 1400px;
+    margin: auto;
+    padding: 0 26px;
+
+    display: flex;
+    gap: 36px;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #374151;
+    padding: 13px 0;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+}
+
+.nav-item.active {
+    color: #ff7a00;
+    border-bottom: 2px solid #ff7a00;
+    font-weight: 600;
+}
+
+/* ================= MAIN LAYOUT ================= */
+
+.payment-wrapper {
+    min-height: calc(100vh - 140px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+/* ================= PAYMENT PANEL ================= */
+
+.payment-panel {
+    width: 100%;
+    max-width: 720px;
+
+    background: white;
+    border-radius: 28px;
+    padding: 52px 48px;
+
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
+
+    margin: 0 auto;
+}
+
+/* ================= SECTION ================= */
+
+.section {
+    margin-bottom: 32px;
+}
+
+.section h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+/* ================= QR ================= */
+
+.qr-section {
+    background: #ffffff;
+
+    border-radius: 26px;
+    padding: 36px 32px;
+
+    border: 1px solid #e5e7eb;
+
+    text-align: center;
+}
+
+/* QR IMAGE */
+
+.qr-section img {
+    display: block;
+    margin: 0 auto 26px;
+
+    width: 100%;
+    max-width: 360px;
+    max-height: 440px;
+
+    object-fit: contain;
+
+    border-radius: 28px;
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+/* PRICE */
+
+.qr-section p {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.qr-section h1 {
+    font-size: 34px;
+    color: #ff7a00;
+    margin: 6px 0 12px;
+}
+
+/* BOOKING */
+
+.qr-section small {
+    display: block;
+    font-size: 13px;
+    color: #374151;
+}
+
+/* ================= TIMER ================= */
+
+.timer {
+    margin-top: 14px;
+    font-size: 14px;
+}
+
+.timer span {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* ================= UPLOAD ================= */
+
+.upload-section label {
+    font-weight: 600;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.upload-box {
+    border: 2px dashed #e5e7eb;
+    border-radius: 22px;
+    padding: 30px;
+
+    text-align: center;
+
+    background: #fafafa;
+}
+
+.upload-box input {
+    margin-bottom: 8px;
+}
+
+.upload-box p {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.upload-box img {
+    display: block;
+    margin: 18px auto 0;
+
+    max-width: 260px;
+    border-radius: 18px;
+
+    border: 1px solid #e5e7eb;
+}
+
+/* ================= ACTION ================= */
+
+.actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 34px;
+}
+
+.btn-primary {
+    width: 100%;
+    max-width: 340px;
+
+    background: linear-gradient(135deg, #ff7a00, #fb923c);
+    color: white;
+
+    padding: 14px 0;
+
+    border-radius: 999px;
+    border: none;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 600px) {
+
+    .payment-panel {
+        padding: 36px 26px;
+    }
+
+    .qr-section {
+        padding: 26px 22px;
+    }
+
+    .qr-section img {
+        max-width: 260px;
+        max-height: 340px;
+    }
+
+    .qr-section h1 {
+        font-size: 26px;
+    }
+}

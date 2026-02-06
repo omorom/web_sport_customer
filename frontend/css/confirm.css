@@ -474,6 +474,12 @@ body {
     width: 100%;
 }
 
+.confirm-item-price .per-hour {
+    font-size: 13px;
+    color: #888;
+}
+
+
 /* ================= MOBILE ================= */
 
 @media (max-width: 900px) {

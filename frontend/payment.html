@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>ชำระเงิน | ระบบจองอุปกรณ์กีฬา</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/confirm.css">
+    <link rel="stylesheet" href="css/payment.css">
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="main-header">
+
+        <div class="header-top">
+
+            <div class="brand">
+                <span class="brand-name">ระบบจองอุปกรณ์กีฬา</span>
+                <small>Sports Equipment Booking System</small>
+            </div>
+
+            <div class="user-zone">
+                <div class="badge orange" id="topPoints">⭐ - คะแนน</div>
+                <a class="badge purple" href="coupon.html">🎟 คูปอง</a>
+                <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+            </div>
+
+        </div>
+
+        <div class="header-bottom">
+            <nav class="main-nav">
+                <a href="index.html" class="nav-item active">เลือกอุปกรณ์</a>
+                <a href="my-bookings.html" class="nav-item">รายการจอง</a>
+                <a href="history.html" class="nav-item">ประวัติการเช่า</a>
+                <a href="history_point.html" class="nav-item">ประวัติการใช้แต้ม</a>
+                <a href="status_maintenance.html" class="nav-item">สถานะการซ่อม</a>
+            </nav>
+        </div>
+
+
+    </header>
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="payment-wrapper">
+
+        <div class="payment-panel">
+
+            <!-- ================= QR ================= -->
+
+            <section class="section">
+
+                <h3>ชำระเงินด้วย QR Code</h3>
+
+                <div class="qr-section">
+
+                    <img id="qrImg" src="/sports_rental_system/uploads/qr_promptpay.jpg" alt="QR Code PromptPay">
+
+                    <p>ยอดที่ต้องชำระ</p>
+                    <h1 id="payAmount">0 บาท</h1>
+
+                    <small>
+                        Booking:
+                        <strong id="bookingCode">-</strong>
+                    </small>
+
+                    <div class="timer">
+                        เหลือเวลา: <span id="countdown">10:00</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ================= UPLOAD ================= -->
+
+            <section class="upload-section">
+
+                <label for="slipInput">แนบสลิปการโอนเงิน</label>
+
+                <div class="upload-box">
+
+                    <input type="file" id="slipInput" name="slip" accept="image/png,image/jpeg" />
+
+                    <p>รองรับ JPG / PNG (ไม่เกิน 5MB)</p>
+
+                    <img id="previewImg" hidden>
+
+                </div>
+
+            </section>
+
+            <!-- ================= ACTION ================= -->
+
+            <section class="actions">
+
+                <button type="button" id="confirmPayBtn" class="btn-primary">
+                    ยืนยันการชำระเงิน
+                </button>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <script src="payment.js"></script>
+</body>
+
+</html>
