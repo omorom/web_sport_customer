@@ -58,7 +58,9 @@ $stmt = $conn->prepare("
     AND bs.code IN (
         'WAITING_STAFF',
         'CONFIRMED_WAITING_PICKUP',
-        'IN_USE'
+        'IN_USE',
+        'CANCELLED',
+        'REFUNDED'
     )
     ORDER BY b.pickup_time DESC
 ");

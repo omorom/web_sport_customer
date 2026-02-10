@@ -50,7 +50,7 @@ try {
         SET booking_status_id = ?,
             payment_status_id = ?,
             cancellation_reason = ?,
-            cancelled_by = ?,
+            cancelled_by_customer_id = ?,
             cancelled_at = NOW()
         WHERE booking_id = ?
           AND customer_id = ?

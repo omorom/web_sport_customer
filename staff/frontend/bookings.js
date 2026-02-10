@@ -3,6 +3,7 @@ console.log("🔥 STAFF BOOKINGS TS READY 🔥");
 var bookingList = document.getElementById("bookingList");
 var tabs = document.querySelectorAll(".status-tab");
 /* ================= STATE ================= */
+var pendingCancelId = null;
 var allBookings = [];
 var currentStatus = "WAITING_STAFF";
 /* ================= INIT ================= */
@@ -49,6 +50,15 @@ function updateCounts() {
             (counts[code] || 0).toString();
     });
 }
+/* ================= HELPER ================= */
+function getBookingById(id) {
+    for (var i = 0; i < allBookings.length; i++) {
+        if (allBookings[i].booking_id === id) {
+            return allBookings[i];
+        }
+    }
+    return null;
+}
 /* ================= RENDER ================= */
 function renderList(status) {
     currentStatus = status;
@@ -66,13 +76,98 @@ function renderList(status) {
             badge = "ready";
             text = "รอรับอุปกรณ์";
         }
-        if (status === "IN_USE") {
-            badge = "active";
-            text = "กำลังใช้งาน";
+        if (status === "CANCELLED") {
+            badge = "cancel";
+            text = "ยกเลิกแล้ว";
         }
-        html += "\n            <div class=\"booking-card\">\n\n                <div class=\"booking-info\">\n\n                    <span class=\"status ".concat(badge, "\">\n                        ").concat(text, "\n                    </span>\n\n                    <h4>\u0E23\u0E2B\u0E31\u0E2A\u0E01\u0E32\u0E23\u0E08\u0E2D\u0E07: ").concat(b.booking_id, "</h4>\n\n                    <p>\n                        \u0E25\u0E39\u0E01\u0E04\u0E49\u0E32: ").concat(b.customer_name, "<br>\n                        \u0E23\u0E31\u0E1A: ").concat(b.pickup_time, "<br>\n                        \u0E04\u0E37\u0E19: ").concat(b.due_return_time, "\n                    </p>\n\n                    <p>\n                        <strong>").concat(b.net_amount, " \u0E1A\u0E32\u0E17</strong>\n                    </p>\n\n                </div>\n\n                <div class=\"booking-actions\">\n\n                    <a class=\"btn-outline\"\n                    href=\"booking-detail.html?code=").concat(b.booking_id, "\">\n                        \u0E14\u0E39\u0E23\u0E32\u0E22\u0E25\u0E30\u0E40\u0E2D\u0E35\u0E22\u0E14\n                    </a>\n\n                </div>\n\n            </div>\n        ");
+        html += "\n            <div class=\"booking-card\">\n\n                <div class=\"booking-info\">\n\n                    <span class=\"status ".concat(badge, "\">\n                        ").concat(text, "\n                    </span>\n\n                    <h4>\u0E23\u0E2B\u0E31\u0E2A\u0E01\u0E32\u0E23\u0E08\u0E2D\u0E07: ").concat(b.booking_id, "</h4>\n\n                    <p>\n                        \u0E25\u0E39\u0E01\u0E04\u0E49\u0E32: ").concat(b.customer_name, "<br>\n                        \u0E23\u0E31\u0E1A: ").concat(b.pickup_time, "<br>\n                        \u0E04\u0E37\u0E19: ").concat(b.due_return_time, "\n                    </p>\n\n                    <p>\n                        <strong>").concat(b.net_amount, " \u0E1A\u0E32\u0E17</strong>\n                    </p>\n\n                </div>\n\n                <div class=\"booking-actions\">\n\n    <a class=\"btn-outline\"\n        href=\"booking-detail.html?code=").concat(b.booking_id, "\">\n        \u0E14\u0E39\u0E23\u0E32\u0E22\u0E25\u0E30\u0E40\u0E2D\u0E35\u0E22\u0E14\n    </a>\n\n    ").concat(status === "WAITING_STAFF"
+            ? "\n                <button class=\"btn-approve\"\n                    data-id=\"".concat(b.booking_id, "\">\n                    \u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34\n                </button>\n\n                <button class=\"btn-cancel\"\n                    data-id=\"").concat(b.booking_id, "\">\n                    \u0E22\u0E01\u0E40\u0E25\u0E34\u0E01\n                </button>\n            ")
+            : status === "CONFIRMED_WAITING_PICKUP"
+                ? "\n                    <a\n                        href=\"receive-equipment.html?code=".concat(b.booking_id, "\"\n                        class=\"btn-approve\">\n                        \u0E01\u0E23\u0E2D\u0E01\u0E2D\u0E38\u0E1B\u0E01\u0E23\u0E13\u0E4C\n                    </a>\n                ")
+                : "", "\n\n</div>\n\n\n            </div>\n        ");
     });
     bookingList.innerHTML = html;
+    bindActionButtons();
+}
+/* ================= ACTION BUTTONS ================= */
+function bindActionButtons() {
+    document
+        .querySelectorAll(".btn-approve")
+        .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var id = btn.dataset.id;
+            if (!id)
+                return;
+            if (!confirm("ยืนยันอนุมัติการจองนี้?"))
+                return;
+            approveBooking(id);
+        });
+    });
+    document
+        .querySelectorAll(".btn-cancel")
+        .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var id = btn.dataset.id;
+            if (!id)
+                return;
+            pendingCancelId = id;
+            openCancelModal();
+        });
+    });
+}
+/* ================= APPROVE ================= */
+function approveBooking(id) {
+    fetch("/sports_rental_system/staff/api/approve_booking.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        credentials: "include",
+        body: "booking_id=".concat(encodeURIComponent(id))
+    })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+        if (!res.success) {
+            alert(res.message || "อนุมัติไม่สำเร็จ");
+            return;
+        }
+        var target = getBookingById(id);
+        if (target) {
+            target.status_code =
+                "CONFIRMED_WAITING_PICKUP";
+        }
+        updateCounts();
+        renderList(currentStatus);
+    })
+        .catch(function () { return alert("เชื่อมต่อไม่ได้"); });
+}
+/* ================= CANCEL ================= */
+function cancelBooking(id, reason) {
+    fetch("/sports_rental_system/staff/api/cancel_booking.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            booking_id: id,
+            reason: reason
+        })
+    })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+        if (!res.success) {
+            alert(res.message || "ยกเลิกไม่สำเร็จ");
+            return;
+        }
+        var target = getBookingById(id);
+        if (target) {
+            target.status_code = "CANCELLED";
+        }
+        updateCounts();
+        renderList(currentStatus);
+    })
+        .catch(function () { return alert("เชื่อมต่อไม่ได้"); });
 }
 /* ================= TABS ================= */
 function bindTabs() {
@@ -89,3 +184,34 @@ function bindTabs() {
         });
     });
 }
+/* ================= CANCEL MODAL ================= */
+var cancelModal = document.getElementById("cancelModal");
+var cancelReasonInput = document.getElementById("cancelReasonInput");
+var cancelModalClose = document.getElementById("cancelModalClose");
+var cancelModalConfirm = document.getElementById("cancelModalConfirm");
+function openCancelModal() {
+    if (!cancelModal)
+        return;
+    cancelReasonInput.value = "";
+    cancelModal.classList.remove("hidden");
+    cancelReasonInput.focus();
+}
+function closeCancelModal() {
+    if (!cancelModal)
+        return;
+    cancelModal.classList.add("hidden");
+    pendingCancelId = null;
+}
+/* bind modal buttons */
+cancelModalClose.addEventListener("click", closeCancelModal);
+cancelModalConfirm.addEventListener("click", function () {
+    if (!pendingCancelId)
+        return;
+    var reason = cancelReasonInput.value.trim();
+    if (!reason) {
+        alert("กรุณากรอกเหตุผล");
+        return;
+    }
+    cancelBooking(pendingCancelId, reason);
+    closeCancelModal();
+});

@@ -30,7 +30,7 @@
       <nav class="main-nav">
         <a href="index.html" class="nav-item">เช่าอุปกรณ์</a>
         <a href="bookings.html" class="nav-item active">รายการเช่า</a>
-        <a href="history.html" class="nav-item">คืนอุปกรณ์</a>
+        <a href="return.html" class="nav-item">คืนอุปกรณ์</a>
         <a href="history_point.html" class="nav-item">สถานะอุปกรณ์</a>
       </nav>
     </div>
@@ -52,8 +52,8 @@
             รอรับอุปกรณ์ (<span id="count-CONFIRMED_WAITING_PICKUP">0</span>)
         </button>
 
-        <button class="status-tab" data-status="IN_USE">
-            กำลังใช้งาน (<span id="count-IN_USE">0</span>)
+        <button class="status-tab" data-status="CANCELLED">
+            คำขอยกเลิก (<span id="count-CANCELLED">0</span>)
         </button>
 
     </div>
@@ -61,6 +61,37 @@
     <!-- LIST -->
     <div class="booking-list" id="bookingList">
         <p class="loading">กำลังโหลด...</p>
+    </div>
+
+</div>
+
+<div id="cancelModal" class="modal hidden">
+
+    <div class="modal-box">
+
+        <h3>ยกเลิกการจอง</h3>
+
+        <p>กรุณาระบุเหตุผล:</p>
+
+        <textarea
+            id="cancelReasonInput"
+            placeholder="เช่น อุปกรณ์ไม่พร้อม / ลูกค้าไม่มาตามนัด"
+        ></textarea>
+
+        <div class="modal-actions">
+
+            <button id="cancelModalClose"
+                class="btn-outline">
+                ย้อนกลับ
+            </button>
+
+            <button id="cancelModalConfirm"
+                class="btn-danger">
+                ยืนยันยกเลิก
+            </button>
+
+        </div>
+
     </div>
 
 </div>

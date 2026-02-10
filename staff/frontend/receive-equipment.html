@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>รับอุปกรณ์</title>
+
+    <link rel="stylesheet" href="css/receive-equipment.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <h1 class="page-title">รับอุปกรณ์</h1>
+
+    <div class="container">
+
+        <!-- back -->
+        <div class="back-wrapper">
+            <button id="backBtn" class="back-btn">
+                ← กลับไปหน้ารายการ
+            </button>
+        </div>
+
+        <div class="card">
+
+            <div class="row">
+                <span>รหัสการจอง:</span>
+                <strong id="bookingCode">-</strong>
+            </div>
+
+            <h3>รายการที่ต้องรับ</h3>
+
+            <!-- 🔥 สำคัญ -->
+            <div id="receiveItems" class="equipment-list"></div>
+
+            <div class="actions">
+                <button id="confirmReceiveBtn" class="confirm-btn">
+                    ยืนยันรับอุปกรณ์
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="receive-equipment.js"></script>
+
+</body>
+
+</html>
