@@ -160,13 +160,26 @@ function renderItems() {
         /* ===== VENUE ===== */
         else if (item.venue_id) {
 
-            loadVenueInstances(
-                item.venue_id,
-                select,
-                item.instance_code,
-                index
-            );
+            // 🔥 venue ใช้ตัวเดียว ไม่ต้องเลือก
+
+            select.innerHTML = "";
+
+            const opt = document.createElement("option");
+
+            opt.value = item.venue_id;
+            opt.textContent = item.venue_id;
+
+            opt.selected = true;
+
+            select.appendChild(opt);
+
+            select.disabled = true;
+
+            // set เข้า state
+            receiveRows[index].instance_code =
+                item.venue_id;
         }
+
 
         select.addEventListener("change", () => {
             receiveRows[index].instance_code = select.value;
@@ -331,7 +344,7 @@ function submitReceive() {
                 return;
             }
 
-            alert("✅ รับอุปกรณ์เรียบร้อย");
+            alert("รับอุปกรณ์เรียบร้อย");
 
             window.location.href = "bookings.html";
         });

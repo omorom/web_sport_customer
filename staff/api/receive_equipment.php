@@ -9,7 +9,7 @@ $data = json_decode(file_get_contents("php://input"), true);
 $bookingId = $data["booking_id"] ?? null;
 $items = $data["items"] ?? [];
 
-if (!$bookingId || !$items) {
+if (!$bookingId || empty($items)) {
     echo json_encode([
         "success" => false,
         "message" => "missing data"
@@ -21,31 +21,49 @@ $conn->begin_transaction();
 
 try {
 
+    /* ============================
+       UPDATE EQUIPMENT INSTANCE
+    ============================ */
+
     $stmt = $conn->prepare("
         UPDATE booking_details
-        SET item_id = ?
+        SET equipment_instance_id = ?
         WHERE detail_id = ?
+          AND item_type = 'Equipment'
     ");
 
     foreach ($items as $i) {
 
+        // 👉 ถ้าไม่มี instance = venue → ข้าม
+        if (empty($i["instance_code"])) {
+            continue;
+        }
+
         $stmt->bind_param(
-            "ss",
+            "si",
             $i["instance_code"],
             $i["detail_id"]
         );
 
         if (!$stmt->execute()) {
-            throw new Exception("update failed");
+            throw new Exception("update booking_details failed");
         }
     }
 
-    $row = $conn->query(
-        "SELECT id FROM booking_status WHERE code='IN_USE'"
-    )->fetch_assoc();
+    /* ============================
+       SET STATUS = IN_USE
+    ============================ */
+
+    $row = $conn
+        ->query("
+            SELECT id
+            FROM booking_status
+            WHERE code='IN_USE'
+        ")
+        ->fetch_assoc();
 
     if (!$row) {
-        throw new Exception("missing IN_USE");
+        throw new Exception("missing IN_USE status");
     }
 
     $statusId = $row["id"];
@@ -57,7 +75,10 @@ try {
     ");
 
     $stmt2->bind_param("is", $statusId, $bookingId);
-    $stmt2->execute();
+
+    if (!$stmt2->execute()) {
+        throw new Exception("update booking status failed");
+    }
 
     $conn->commit();
 
