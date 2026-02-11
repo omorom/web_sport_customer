@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>ชำระเงิน | ระบบจองอุปกรณ์กีฬา</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/qr_payment.css">
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="main-header">
+
+        <div class="header-top">
+
+            <div class="brand">
+                <span class="brand-name">ระบบจองอุปกรณ์กีฬา</span>
+                <small>Sports Equipment Booking System</small>
+            </div>
+
+            <div class="user-zone">
+                <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+            </div>
+
+        </div>
+
+        <div class="header-bottom">
+            <nav class="main-nav">
+                <a href="index.html" class="nav-item active">เช่าอุปกรณ์</a>
+                <a href="bookings.html" class="nav-item">รายการเช่า</a>
+                <a href="return.html" class="nav-item">คืนอุปกรณ์</a>
+                <a href="history_point.html" class="nav-item">สถานะอุปกรณ์</a>
+            </nav>
+        </div>
+
+
+    </header>
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="payment-wrapper">
+
+        <div class="payment-panel">
+
+            <section class="section">
+
+                <h3>ชำระเงินด้วย QR Code</h3>
+
+                <div class="qr-section">
+
+                    <img id="qrImg" src="/sports_rental_system/uploads/qr_promptpay.jpg">
+
+                    <p>ยอดที่ต้องชำระ</p>
+
+                    <h1 id="payAmount">0 บาท</h1>
+
+                    <small>
+                        Booking:
+                        <strong id="bookingCode">-</strong>
+                    </small>
+
+                </div>
+
+            </section>
+
+            <section class="actions">
+
+                <button id="confirmPayBtn" class="btn-primary" type="button">
+                    ยืนยันรับชำระแล้ว
+                </button>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <script src="qr_payment.js"></script>
+</body>
+
+</html>

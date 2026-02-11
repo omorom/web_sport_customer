@@ -332,25 +332,6 @@ function setupMemberModal() {
             foundCustomer.customer_id
         );
 
-        localStorage.setItem(
-            "customer_name",
-            foundCustomer.name
-        );
-
-        localStorage.setItem(
-            "customer_phone",
-            foundCustomer.phone || "-"
-        );
-
-        localStorage.setItem(
-            "customer_faculty",
-            foundCustomer.faculty_name || "-"
-        );
-
-        localStorage.setItem(
-            "customer_year",
-            foundCustomer.study_year || "-"
-        );
 
 
         modal.classList.add("hidden");

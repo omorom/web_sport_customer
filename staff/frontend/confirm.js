@@ -5,7 +5,7 @@ GLOBAL
 var USER_POINTS = 0;
 var usedPoints = 0;
 var couponDiscount = 0;
-var couponCode = "";
+var couponCode = null;
 var equipmentTotal = 0;
 var fieldTotal = 0;
 var extraHourFee = 0;
@@ -44,13 +44,24 @@ function loadBranch() {
 LOAD CUSTOMER
 ================================ */
 function loadCustomerInfo() {
-    setText("cId", localStorage.getItem("customer_id") || "-");
-    setText("cName", localStorage.getItem("customer_name") || "-");
-    setText("cPhone", localStorage.getItem("customer_phone") || "-");
-    setText("cFaculty", localStorage.getItem("customer_faculty") || "-");
-    setText("cYear", localStorage.getItem("customer_year") || "-");
-    USER_POINTS = Number(localStorage.getItem("customer_points") || 0);
-    setText("availablePoints", USER_POINTS.toString());
+    var id = localStorage.getItem("customer_id");
+    if (!id)
+        return;
+    fetch("/sports_rental_system/staff/api/get_customer.php?id=" + id, { credentials: "include" })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+        if (!res.success)
+            return;
+        var c = res.customer;
+        setText("cId", c.customer_id);
+        setText("cName", c.name);
+        setText("cPhone", c.phone || "-");
+        setText("cFaculty", c.faculty_name || "-");
+        setText("cYear", c.study_year || "-");
+        USER_POINTS = Number(c.current_points || 0);
+        setText("userPoints", USER_POINTS.toString());
+        console.log("✅ STAFF POINTS =", USER_POINTS);
+    });
 }
 /* ===============================
 BOOKING INFO
@@ -85,35 +96,13 @@ function renderItems() {
         var row = document.createElement("div");
         row.className = "confirm-item";
         var imgHtml = item.image && item.image !== "null"
-            ? '<img src="' + item.image.trim() + '" alt="">'
+            ? "<img src=\"".concat(item.image.trim(), "\" alt=\"\">")
             : "";
         row.innerHTML =
             imgHtml +
-                '<div class="confirm-item-info">' +
-                '<h4>' + item.name + '</h4>' +
-                '<small>' +
-                (isField(item.type)
-                    ? "รหัสสนาม: " +
-                        (item.venue_code || item.instance_code || "-")
-                    : "รหัสอุปกรณ์: " +
-                        (item.instance_code || "-")) +
-                '</small>' +
-                '</div>' +
-                '<div class="confirm-item-qty">x<strong>' +
-                qty +
-                '</strong></div>' +
-                '<div class="confirm-item-price">' +
-                '<div class="per-hour">' +
-                perHourTotal +
-                ' บาท / ชม.</div>' +
-                '<strong>' +
-                perHourTotal +
-                ' × ' +
-                hours +
-                ' = ' +
-                total +
-                ' บาท</strong>' +
-                '</div>';
+                "<div class=\"confirm-item-info\">\n\t\t\t\t<h4>".concat(item.name, "</h4>\n\t\t\t\t<small>\n\t\t\t\t\t").concat(isField(item.type)
+                    ? "รหัสสนาม: " + (item.venue_code || item.instance_code || "-")
+                    : "รหัสอุปกรณ์: " + (item.instance_code || "-"), "\n\t\t\t\t</small>\n\t\t\t</div>\n\n\t\t\t<div class=\"confirm-item-qty\">x<strong>").concat(qty, "</strong></div>\n\n\t\t\t<div class=\"confirm-item-price\">\n\t\t\t\t<div class=\"per-hour\">").concat(perHourTotal, " \u0E1A\u0E32\u0E17 / \u0E0A\u0E21.</div>\n\t\t\t\t<strong>").concat(perHourTotal, " \u00D7 ").concat(hours, " = ").concat(total, " \u0E1A\u0E32\u0E17</strong>\n\t\t\t</div>");
         box.appendChild(row);
     });
 }
@@ -128,9 +117,7 @@ function calcTotals() {
     cart.forEach(function (i) {
         var price = Number(i.price || 0);
         var qty = Number(i.qty || 1);
-        var subtotal = price *
-            qty *
-            hours;
+        var subtotal = price * qty * hours;
         if (isField(i.type)) {
             fieldTotal += subtotal;
         }
@@ -171,24 +158,40 @@ function updateTotals() {
     setText("earnPoints", Math.floor(net / 100).toString());
 }
 /* ===============================
-POINT CONTROLS
+POINT CONTROLS ✅ FIXED
 ================================ */
 function bindPointControls() {
     var input = document.getElementById("usePointInput");
+    var plusBtn = document.getElementById("plusPoint");
+    var minusBtn = document.getElementById("minusPoint");
+    var maxBtn = document.getElementById("useMaxPoint");
     if (!input)
         return;
-    input.addEventListener("change", function () {
+    function applyPoint(v) {
         var gross = equipmentTotal +
             fieldTotal +
             extraHourFee;
-        var v = Number(input.value || 0);
         if (v > USER_POINTS)
             v = USER_POINTS;
         if (v > gross)
             v = gross;
+        if (v < 0)
+            v = 0;
         usedPoints = v;
         input.value = v.toString();
         updateTotals();
+    }
+    input.addEventListener("change", function () {
+        applyPoint(Number(input.value || 0));
+    });
+    plusBtn === null || plusBtn === void 0 ? void 0 : plusBtn.addEventListener("click", function () {
+        applyPoint(usedPoints + 1);
+    });
+    minusBtn === null || minusBtn === void 0 ? void 0 : minusBtn.addEventListener("click", function () {
+        applyPoint(usedPoints - 1);
+    });
+    maxBtn === null || maxBtn === void 0 ? void 0 : maxBtn.addEventListener("click", function () {
+        applyPoint(USER_POINTS);
     });
 }
 /* ===============================

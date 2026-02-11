@@ -34,7 +34,6 @@ try {
 
     foreach ($items as $i) {
 
-        // 👉 ถ้าไม่มี instance = venue → ข้าม
         if (empty($i["instance_code"])) {
             continue;
         }
