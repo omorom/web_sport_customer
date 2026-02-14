@@ -166,22 +166,36 @@ function bindPointControls(): void {
         fieldTotal +
         extraHourFee;
 
-    const getMaxUsablePoints = () =>
-        Math.max(
-            getGross() - couponDiscount,
+    const getMaxUsablePoints = () => {
+
+        const gross = getGross();
+        const maxByAmount = gross - couponDiscount;
+
+        return Math.max(
+            Math.min(USER_POINTS, maxByAmount),
             0
         );
+    };
+
+    const refreshInput = () => {
+
+        const max = getMaxUsablePoints();
+
+        if (usedPoints > max) {
+            usedPoints = max;
+        }
+
+        input.value = usedPoints.toString();
+    };
 
     document.getElementById("plusPoint")
         ?.addEventListener("click", () => {
 
-            if (
-                usedPoints < USER_POINTS &&
-                usedPoints < getMaxUsablePoints()
-            ) {
+            const max = getMaxUsablePoints();
 
+            if (usedPoints < max) {
                 usedPoints++;
-                input.value = usedPoints.toString();
+                refreshInput();
                 updateTotals();
             }
         });
@@ -190,9 +204,8 @@ function bindPointControls(): void {
         ?.addEventListener("click", () => {
 
             if (usedPoints > 0) {
-
                 usedPoints--;
-                input.value = usedPoints.toString();
+                refreshInput();
                 updateTotals();
             }
         });
@@ -200,13 +213,8 @@ function bindPointControls(): void {
     document.getElementById("useMaxPoint")
         ?.addEventListener("click", () => {
 
-            usedPoints =
-                Math.min(
-                    USER_POINTS,
-                    getMaxUsablePoints()
-                );
-
-            input.value = usedPoints.toString();
+            usedPoints = getMaxUsablePoints();
+            refreshInput();
             updateTotals();
         });
 }

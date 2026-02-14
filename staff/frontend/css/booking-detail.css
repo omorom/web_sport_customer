@@ -202,3 +202,21 @@ body {
 .hidden {
     display: none;
 }
+
+.payment-msg {
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.payment-msg.cash {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.payment-msg.credit {
+    background: #e3f2fd;
+    color: #1565c0;
+}

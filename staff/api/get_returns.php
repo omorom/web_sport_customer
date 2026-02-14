@@ -4,7 +4,10 @@ session_start();
 
 header("Content-Type: application/json; charset=utf-8");
 
-// ===== ตรวจสอบสิทธิ์ staff =====
+/* ===============================
+   ตรวจสอบสิทธิ์ staff
+=============================== */
+
 if (!isset($_SESSION["staff_id"])) {
     echo json_encode([
         "success" => false,
@@ -15,43 +18,58 @@ if (!isset($_SESSION["staff_id"])) {
 
 $status = $_GET["status"] ?? "IN_USE";
 
-/* =====================================================
-   เงื่อนไข dynamic ตาม status ที่เลือก
-===================================================== */
+/* ===============================
+   เงื่อนไข dynamic
+=============================== */
 
 $whereCondition = "";
-$params = [];
 
+// ===== กำลังใช้งาน (ยังไม่เกินกำหนด) =====
 if ($status === "IN_USE") {
 
-    // ยังไม่เกินกำหนด
     $whereCondition = "
         bs.code = 'IN_USE'
         AND b.due_return_time >= NOW()
     ";
+}
 
-} elseif ($status === "OVERDUE") {
+// ===== เกินกำหนด =====
+elseif ($status === "OVERDUE") {
 
-    // เกินกำหนด
     $whereCondition = "
         bs.code = 'IN_USE'
         AND b.due_return_time < NOW()
     ";
+}
 
-} elseif ($status === "RETURNED") {
+// ===== คืนแล้ว =====
+elseif ($status === "RETURNED") {
 
     $whereCondition = "
         bs.code = 'RETURNED'
     ";
-
-} else {
-
-    $whereCondition = "bs.code = 'IN_USE'";
 }
 
-/* =====================================================
+// ===== ALL (ใช้สำหรับนับ count) =====
+elseif ($status === "ALL") {
+
+    // ดึงเฉพาะที่ยัง IN_USE แล้วให้ frontend แยกเอง
+    $whereCondition = "
+        bs.code = 'IN_USE'
+    ";
+}
+
+// ===== default =====
+else {
+
+    $whereCondition = "
+        bs.code = 'IN_USE'
+    ";
+}
+
+/* ===============================
    QUERY
-===================================================== */
+=============================== */
 
 $sql = "
 SELECT
@@ -78,6 +96,14 @@ ORDER BY b.due_return_time ASC
 ";
 
 $result = $conn->query($sql);
+
+if (!$result) {
+    echo json_encode([
+        "success" => false,
+        "message" => $conn->error
+    ]);
+    exit;
+}
 
 $data = [];
 

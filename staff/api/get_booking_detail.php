@@ -56,14 +56,15 @@ $stmt = $conn->prepare("
         br.name AS branch_name,
 
         p.slip_url,
-        p.paid_at
+        p.paid_at,
+        pm.code AS payment_method
 
     FROM bookings b
     JOIN booking_status bs ON b.booking_status_id = bs.id
     JOIN payment_status ps ON b.payment_status_id = ps.id
     JOIN branches br ON b.branch_id = br.branch_id
-    LEFT JOIN payments p 
-        ON p.booking_id = b.booking_id
+    LEFT JOIN payments p ON p.booking_id = b.booking_id
+    LEFT JOIN payment_methods pm ON p.method_id = pm.method_id
 
     WHERE b.booking_id = ?
     LIMIT 1

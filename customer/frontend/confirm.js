@@ -109,27 +109,35 @@ function bindPointControls() {
             extraHourFee;
     };
     var getMaxUsablePoints = function () {
-        return Math.max(getGross() - couponDiscount, 0);
+        var gross = getGross();
+        var maxByAmount = gross - couponDiscount;
+        return Math.max(Math.min(USER_POINTS, maxByAmount), 0);
+    };
+    var refreshInput = function () {
+        var max = getMaxUsablePoints();
+        if (usedPoints > max) {
+            usedPoints = max;
+        }
+        input.value = usedPoints.toString();
     };
     (_a = document.getElementById("plusPoint")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", function () {
-        if (usedPoints < USER_POINTS &&
-            usedPoints < getMaxUsablePoints()) {
+        var max = getMaxUsablePoints();
+        if (usedPoints < max) {
             usedPoints++;
-            input.value = usedPoints.toString();
+            refreshInput();
             updateTotals();
         }
     });
     (_b = document.getElementById("minusPoint")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", function () {
         if (usedPoints > 0) {
             usedPoints--;
-            input.value = usedPoints.toString();
+            refreshInput();
             updateTotals();
         }
     });
     (_c = document.getElementById("useMaxPoint")) === null || _c === void 0 ? void 0 : _c.addEventListener("click", function () {
-        usedPoints =
-            Math.min(USER_POINTS, getMaxUsablePoints());
-        input.value = usedPoints.toString();
+        usedPoints = getMaxUsablePoints();
+        refreshInput();
         updateTotals();
     });
 }

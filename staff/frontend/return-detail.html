@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ตรวจสอบการคืนอุปกรณ์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/return-detail.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <h2>ตรวจสอบการคืน</h2>
+
+  <div id="loading">กำลังโหลด...</div>
+
+  <div id="detailBox" class="hidden">
+
+    <h3>รหัสการจอง: <span id="bookingCode"></span></h3>
+
+    <div id="itemList"></div>
+
+    <div class="summary">
+      <h3>สรุปค่าปรับ</h3>
+      <div id="lateInfo"></div>
+      <div id="penaltySummary"></div>
+    </div>
+
+    <div class="action-row">
+      <button id="confirmBtn" class="btn-confirm">
+        บันทึกการคืน
+      </button>
+
+      <button onclick="window.location.href='return.html'" class="btn-cancel">
+        ยกเลิก
+      </button>
+    </div>
+
+  </div>
+
+  <script src="return-detail.js"></script>
+
+</body>
+
+</html>

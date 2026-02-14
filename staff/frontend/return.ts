@@ -1,37 +1,13 @@
-console.log("🔥 STAFF RETURN READY 🔥");
+console.log("🔥 STAFF RETURN LIST READY 🔥");
 
-const listBox =
-    document.getElementById("returnList") as HTMLElement;
+const listBox = document.getElementById("returnList") as HTMLElement;
+const tabs = document.querySelectorAll(".status-tab");
 
-const tabs =
-    document.querySelectorAll(".status-tab");
-
-const modal =
-    document.getElementById("returnModal") as HTMLElement;
-
-const closeBtn =
-    document.getElementById("returnModalClose") as HTMLButtonElement;
-
-const confirmBtn =
-    document.getElementById("returnModalConfirm") as HTMLButtonElement;
-
-const returnItemsBox =
-    document.getElementById("returnItems") as HTMLElement;
-
-const penaltySummary =
-    document.getElementById("penaltySummary") as HTMLElement;
-
-let currentCode: string | null = null;
 let currentStatus = "IN_USE";
-
-let returnItems: any[] = [];
-
-const LATE_FEE_PER_DAY = 50;
 
 /* ================= INIT ================= */
 
 tabs.forEach(tab => {
-
     tab.addEventListener("click", () => {
 
         tabs.forEach(t => t.classList.remove("active"));
@@ -42,16 +18,13 @@ tabs.forEach(tab => {
 
         loadReturns();
     });
-
 });
-
-closeBtn?.addEventListener("click", () => {
-    modal.classList.add("hidden");
-});
-
-/* ================= LOAD BOOKINGS ================= */
 
 loadReturns();
+updateTabCountFromAPI();
+
+
+/* ================= LOAD BOOKINGS ================= */
 
 function loadReturns() {
 
@@ -72,8 +45,56 @@ function loadReturns() {
             }
 
             renderList(res.data || []);
+            updateTabCountFromAPI();
         });
 }
+
+
+/* ================= UPDATE TAB COUNT ================= */
+
+function updateTabCountFromAPI() {
+
+    fetch(
+        "/sports_rental_system/staff/api/get_returns.php?status=ALL",
+        { credentials: "include" }
+    )
+        .then(r => r.json())
+        .then(res => {
+
+            if (!res.success) return;
+
+            let inUse = 0;
+            let overdue = 0;
+
+            const now = new Date();
+
+            (res.data || []).forEach(function (r: any) {
+
+                const dueDate = new Date(r.due_return_time);
+
+                if (now.getTime() > dueDate.getTime()) {
+                    overdue++;
+                } else {
+                    inUse++;
+                }
+            });
+
+            const inUseTab =
+                document.querySelector('[data-status="IN_USE"]');
+
+            const overdueTab =
+                document.querySelector('[data-status="OVERDUE"]');
+
+            if (inUseTab)
+                inUseTab.textContent =
+                    "กำลังใช้งาน (" + inUse + ")";
+
+            if (overdueTab)
+                overdueTab.textContent =
+                    "เกินกำหนด (" + overdue + ")";
+        });
+}
+
 
 /* ================= RENDER LIST ================= */
 
@@ -87,213 +108,57 @@ function renderList(rows: any[]) {
 
     listBox.innerHTML = "";
 
+    const now = new Date();
+
     rows.forEach(r => {
 
-        const card =
-            document.createElement("div");
+        const dueDate = new Date(r.due_return_time);
+        const isOverdue = now.getTime() > dueDate.getTime();
 
+        const statusClass = isOverdue
+            ? "status overdue"
+            : "status active";
+
+        const statusText = isOverdue
+            ? "เกินกำหนด"
+            : "กำลังใช้งาน";
+
+        const card = document.createElement("div");
         card.className = "booking-card";
 
         card.innerHTML = `
             <div class="booking-info">
-                <h4>${r.booking_id}</h4>
+                <span class="${statusClass}">
+                    ${statusText}
+                </span>
+
+                <h4>รหัสการจอง: ${r.booking_id}</h4>
                 <p>ลูกค้า: ${r.customer_name}</p>
                 <p>ครบกำหนด: ${r.due_return_time}</p>
+
             </div>
 
             <div class="booking-actions">
-                <button
-                    class="btn-return"
-                    data-code="${r.booking_id}">
+                <button class="btn-return"
+                        data-code="${r.booking_id}">
                     รับคืน
                 </button>
             </div>
         `;
 
         card.querySelector(".btn-return")
-            ?.addEventListener("click", e => {
+            ?.addEventListener("click", () => {
 
-                const btn =
-                    e.currentTarget as HTMLElement;
+                const confirmReturn = confirm(
+                    `ยืนยันการรับคืนรหัส ${r.booking_id} ?`
+                );
 
-                currentCode =
-                    btn.getAttribute("data-code");
+                if (!confirmReturn) return;
 
-                loadReturnDetails(currentCode!);
+                window.location.href =
+                    `return-detail.html?code=${r.booking_id}`;
             });
 
         listBox.appendChild(card);
     });
-}
-
-/* ================= LOAD DETAILS ================= */
-
-function loadReturnDetails(code: string) {
-
-    fetch(
-        `/sports_rental_system/staff/api/get_return_details.php?booking_id=${code}`,
-        { credentials: "include" }
-    )
-        .then(r => r.json())
-        .then(res => {
-
-            if (!res.success) {
-                alert("โหลดรายละเอียดไม่ได้");
-                return;
-            }
-
-            returnItems = res.items || [];
-
-            renderReturnModal();
-            modal.classList.remove("hidden");
-        });
-}
-
-/* ================= RENDER MODAL ================= */
-
-function renderReturnModal() {
-
-    returnItemsBox.innerHTML = "";
-
-    returnItems.forEach((item, index) => {
-
-        const row =
-            document.createElement("div");
-
-        row.className = "return-row";
-
-        row.innerHTML = `
-            <div>
-                <strong>${item.name}</strong>
-                <br>
-                รหัส: ${item.instance_code}
-            </div>
-
-            <div>
-                <select data-index="${index}">
-                    <option value="NORMAL">ปกติ</option>
-                    <option value="DAMAGED">เสียหาย (100)</option>
-                    <option value="BROKEN">พังหนัก (300)</option>
-                </select>
-            </div>
-        `;
-
-        returnItemsBox.appendChild(row);
-    });
-
-    calculatePenalty();
-}
-
-/* ================= CALCULATE ================= */
-
-function calculatePenalty(): number {
-
-    if (!currentCode) return 0;
-
-    let damageFee = 0;
-
-    const selects =
-        returnItemsBox.querySelectorAll("select");
-
-    selects.forEach((sel: any) => {
-
-        if (sel.value === "DAMAGED")
-            damageFee += 100;
-
-        if (sel.value === "BROKEN")
-            damageFee += 300;
-    });
-
-    const dueText =
-        document.querySelector(
-            `[data-code="${currentCode}"]`
-        )?.closest(".booking-card")
-         ?.querySelector("p:nth-child(3)")
-         ?.textContent;
-
-    let lateFee = 0;
-
-    if (dueText) {
-
-        const dueDate =
-            new Date(dueText.replace("ครบกำหนด: ", ""));
-
-        const now = new Date();
-
-        if (now > dueDate) {
-
-            const diff =
-                now.getTime() - dueDate.getTime();
-
-            const days =
-                Math.floor(
-                    diff /
-                    (1000 * 60 * 60 * 24)
-                );
-
-            lateFee = days * LATE_FEE_PER_DAY;
-        }
-    }
-
-    const total = damageFee + lateFee;
-
-    penaltySummary.innerHTML = `
-        <p>ค่าคืนช้า: ${lateFee} บาท</p>
-        <p>ค่าเสียหาย: ${damageFee} บาท</p>
-        <hr>
-        <strong>รวม: ${total} บาท</strong>
-    `;
-
-    return total;
-}
-
-/* ================= CONFIRM ================= */
-
-confirmBtn?.addEventListener("click", () => {
-
-    if (!currentCode) return;
-
-    const total = calculatePenalty();
-
-    if (total === 0) {
-
-        completeBooking(currentCode);
-
-    } else {
-
-        window.location.href =
-            `return-payment.html?code=${currentCode}&penalty=${total}`;
-    }
-});
-
-/* ================= COMPLETE ================= */
-
-function completeBooking(code: string) {
-
-    fetch(
-        "/sports_rental_system/staff/api/confirm_return.php",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                booking_code: code
-            })
-        }
-    )
-        .then(r => r.json())
-        .then(res => {
-
-            if (!res.success) {
-                alert(res.message);
-                return;
-            }
-
-            alert("คืนสำเร็จ");
-
-            modal.classList.add("hidden");
-            loadReturns();
-        });
 }

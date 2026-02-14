@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ชำระค่าปรับการคืน | ระบบจองอุปกรณ์กีฬา</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/return_payment.css">
+</head>
+
+<body>
+
+<header class="main-header">
+    <div class="header-top">
+        <div class="brand">
+            <span class="brand-name">ระบบจองอุปกรณ์กีฬา</span>
+            <small>Sports Equipment Booking System</small>
+        </div>
+        <div class="user-zone">
+            <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+        </div>
+    </div>
+
+    <div class="header-bottom">
+        <nav class="main-nav">
+            <a href="index.html" class="nav-item">เช่าอุปกรณ์</a>
+            <a href="bookings.html" class="nav-item">รายการเช่า</a>
+            <a href="return.html" class="nav-item active">คืนอุปกรณ์</a>
+            <a href="history_point.html" class="nav-item">สถานะอุปกรณ์</a>
+        </nav>
+    </div>
+</header>
+
+<main class="payment-wrapper">
+
+    <div class="payment-panel">
+
+        <h2>ชำระค่าปรับการคืนอุปกรณ์</h2>
+
+        <div class="booking-info">
+            Booking:
+            <strong id="bookingCode">-</strong>
+        </div>
+
+        <div class="amount-box">
+            <p>ยอดค่าปรับ</p>
+            <h1 id="penaltyAmount">0 บาท</h1>
+        </div>
+
+        <div class="qr-section">
+            <img id="qrImg"
+                 src="/sports_rental_system/uploads/qr_promptpay.jpg">
+            <small>ให้ลูกค้าสแกน QR แล้วกด “ยืนยันรับชำระแล้ว”</small>
+        </div>
+
+        <button id="confirmBtn" class="btn-primary">
+            ยืนยันรับชำระแล้ว
+        </button>
+
+    </div>
+
+</main>
+
+<script>
+
+console.log("🔥 RETURN PENALTY PAYMENT READY 🔥");
+
+const params = new URLSearchParams(window.location.search);
+const code = params.get("code");
+const penalty = params.get("penalty");
+
+const bookingEl = document.getElementById("bookingCode");
+const amountEl = document.getElementById("penaltyAmount");
+const confirmBtn = document.getElementById("confirmBtn");
+
+if (!code || !penalty) {
+    alert("ข้อมูลไม่ครบ");
+    window.location.href = "return.html";
+}
+
+bookingEl.textContent = code;
+amountEl.textContent = parseFloat(penalty).toFixed(2) + " บาท";
+
+confirmBtn.addEventListener("click", function () {
+
+    const ok = confirm("ยืนยันว่ารับเงินค่าปรับเรียบร้อยแล้ว?");
+    if (!ok) return;
+
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "กำลังบันทึก...";
+
+    fetch(
+        "/sports_rental_system/staff/api/confirm_return_penalty.php",
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ booking_code: code })
+        }
+    )
+    .then(r => r.json())
+    .then(res => {
+
+        if (!res.success) {
+            alert(res.message || "เกิดข้อผิดพลาด");
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = "ยืนยันรับชำระแล้ว";
+            return;
+        }
+
+        alert("บันทึกการชำระค่าปรับเรียบร้อย");
+        window.location.href = "return.html";
+    })
+    .catch(() => {
+        alert("เซิร์ฟเวอร์ผิดพลาด");
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "ยืนยันรับชำระแล้ว";
+    });
+
+});
+
+</script>
+
+</body>
+</html>

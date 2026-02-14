@@ -15,12 +15,12 @@ if (!isset($_SESSION["staff_id"])) {
 $data = json_decode(file_get_contents("php://input"), true);
 
 $bookingCode = $data["booking_code"] ?? null;
-$damageFee   = (int)($data["damage_fee"] ?? 0);
+$items = $data["items"] ?? [];
 
-if (!$bookingCode) {
+if (!$bookingCode || empty($items)) {
     echo json_encode([
         "success" => false,
-        "message" => "Missing booking code"
+        "message" => "ข้อมูลไม่ครบ"
     ]);
     exit;
 }
@@ -29,121 +29,167 @@ $conn->begin_transaction();
 
 try {
 
-    /* =========================================
-       1️⃣ ดึงข้อมูล booking
-    ========================================== */
+    /* ===============================
+       GET BOOKING
+    ================================ */
 
     $stmt = $conn->prepare("
-        SELECT due_return_time
+        SELECT booking_id, due_return_time
         FROM bookings
         WHERE booking_id = ?
         FOR UPDATE
     ");
-
     $stmt->bind_param("s", $bookingCode);
     $stmt->execute();
+    $res = $stmt->get_result();
 
-    $row = $stmt->get_result()->fetch_assoc();
-
-    if (!$row) {
-        throw new Exception("ไม่พบ booking");
+    if ($res->num_rows === 0) {
+        throw new Exception("ไม่พบรายการจอง");
     }
 
-    $dueTime = strtotime($row["due_return_time"]);
-    $now     = time();
+    $booking = $res->fetch_assoc();
+    $stmt->close();
 
-    /* =========================================
-       2️⃣ คำนวณค่าปรับคืนช้า (วันละ 50)
-    ========================================== */
+    /* ===============================
+       CALCULATE LATE FEE
+    ================================ */
 
-    $lateDays = 0;
+    $lateFee = 0;
+    $dueDate = new DateTime($booking["due_return_time"]);
+    $now = new DateTime();
 
-    if ($now > $dueTime) {
-        $lateDays = floor(($now - $dueTime) / 86400);
+    if ($now > $dueDate) {
+
+        $secondsLate = $now->getTimestamp() - $dueDate->getTimestamp();
+
+        // เกิน 1 ชั่วโมงก่อน ถึงเริ่มคิด
+        if ($secondsLate > 3600) {
+
+            $daysLate = floor(($secondsLate - 3600) / 86400) + 1;
+            $lateFee = $daysLate * 50;
+        }
     }
 
-    $lateFee = $lateDays * 50;
+    /* ===============================
+       PROCESS ITEMS
+    ================================ */
+
+    $damageFee = 0;
+
+    foreach ($items as $item) {
+
+        $detailId = $item["detail_id"];
+        $conditionId = $item["condition_id"];
+
+        $stmt = $conn->prepare("
+            SELECT equipment_instance_id, price_at_booking
+            FROM booking_details
+            WHERE detail_id = ?
+        ");
+        $stmt->bind_param("i", $detailId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $detail = $res->fetch_assoc();
+        $stmt->close();
+
+        if (!$detail) continue;
+
+        $instanceCode = $detail["equipment_instance_id"];
+        $price = $detail["price_at_booking"];
+
+        /* ===== fine percent ===== */
+
+        $stmt = $conn->prepare("
+            SELECT fine_percent
+            FROM return_conditions
+            WHERE condition_id = ?
+        ");
+        $stmt->bind_param("i", $conditionId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $cond = $res->fetch_assoc();
+        $stmt->close();
+
+        if ($cond) {
+            $damageFee += ($price * $cond["fine_percent"] / 100);
+        }
+
+        /* ===== Save return condition ===== */
+
+        $note = $item["note"] ?? null;
+
+        $stmt = $conn->prepare("
+            INSERT INTO booking_item_assignments
+            (detail_id, instance_code, return_condition_id, note)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                return_condition_id = VALUES(return_condition_id),
+                note = VALUES(note)
+        ");
+
+        $stmt->bind_param(
+            "isis",
+            $detailId,
+            $instanceCode,
+            $conditionId,
+            $note
+        );
+
+        /* ===== คืนอุปกรณ์ ===== */
+
+        if ($instanceCode) {
+            $stmt = $conn->prepare("
+                UPDATE equipment_instances
+                SET status = 'Ready',
+                    current_location = 'Main Storage'
+                WHERE instance_code = ?
+            ");
+            $stmt->bind_param("s", $instanceCode);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
 
     $totalPenalty = $lateFee + $damageFee;
 
-    /* =========================================
-       3️⃣ อัปเดต actual_return_time + penalty_fee
-    ========================================== */
+    /* ===============================
+       UPDATE STATUS
+    ================================ */
 
-    $stmt2 = $conn->prepare("
+    $statusCode = ($totalPenalty <= 0)
+        ? "COMPLETED"
+        : "RETURNING";
+
+    $stmt = $conn->prepare("
+        SELECT id FROM booking_status WHERE code = ?
+    ");
+    $stmt->bind_param("s", $statusCode);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $status = $res->fetch_assoc();
+    $stmt->close();
+
+    if (!$status) {
+        throw new Exception("ไม่พบ booking status: " . $statusCode);
+    }
+
+    $stmt = $conn->prepare("
         UPDATE bookings
-        SET
+        SET booking_status_id = ?,
             actual_return_time = NOW(),
             penalty_fee = ?
         WHERE booking_id = ?
     ");
-
-    $stmt2->bind_param("is", $totalPenalty, $bookingCode);
-
-    if (!$stmt2->execute()) {
-        throw new Exception("อัปเดต booking ไม่สำเร็จ");
-    }
-
-    /* =========================================
-       4️⃣ อัปเดตสถานะอุปกรณ์กลับเป็น Ready
-    ========================================== */
-
-    $updateInstances = $conn->prepare("
-        UPDATE equipment_instances ei
-        JOIN booking_details bd
-            ON bd.equipment_instance_id = ei.instance_code
-        SET
-            ei.status = 'Ready',
-            ei.current_location = 'Main Storage'
-        WHERE bd.booking_id = ?
-    ");
-
-    $updateInstances->bind_param("s", $bookingCode);
-
-    if (!$updateInstances->execute()) {
-        throw new Exception("อัปเดตอุปกรณ์ไม่สำเร็จ");
-    }
-
-    /* =========================================
-       5️⃣ ถ้าไม่มีค่าปรับ → ปิดงานเลย
-    ========================================== */
-
-    if ($totalPenalty == 0) {
-
-        $statusRow = $conn->query("
-            SELECT id FROM booking_status
-            WHERE code = 'COMPLETED'
-            LIMIT 1
-        ")->fetch_assoc();
-
-        if (!$statusRow) {
-            throw new Exception("ไม่พบสถานะ COMPLETED");
-        }
-
-        $statusId = $statusRow["id"];
-
-        $stmt3 = $conn->prepare("
-            UPDATE bookings
-            SET booking_status_id = ?
-            WHERE booking_id = ?
-        ");
-
-        $stmt3->bind_param("is", $statusId, $bookingCode);
-
-        if (!$stmt3->execute()) {
-            throw new Exception("อัปเดตสถานะไม่สำเร็จ");
-        }
-    }
+    $stmt->bind_param("ids", $status["id"], $totalPenalty, $bookingCode);
+    $stmt->execute();
+    $stmt->close();
 
     $conn->commit();
 
     echo json_encode([
         "success" => true,
-        "late_days" => $lateDays,
-        "late_fee" => $lateFee,
-        "damage_fee" => $damageFee,
         "total_penalty" => $totalPenalty,
-        "need_payment" => $totalPenalty > 0
+        "auto_completed" => ($totalPenalty <= 0)
     ]);
 
 } catch (Exception $e) {
@@ -155,3 +201,5 @@ try {
         "message" => $e->getMessage()
     ]);
 }
+
+$conn->close();

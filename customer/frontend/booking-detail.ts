@@ -1,66 +1,211 @@
-interface BookingDetail {
+interface BookingDetailResponse {
+    success: boolean;
     booking: any;
     items: any[];
 }
 
-const params = new URLSearchParams(window.location.search);
-const code = params.get("code");
+document.addEventListener("DOMContentLoaded", function () {
 
-const loading = document.getElementById("loading")!;
-const box = document.getElementById("detailBox")!;
+    var params = new URLSearchParams(window.location.search);
+    var code = params.get("code");
 
-fetch(`/sports_rental_system/customer/api/get_booking_detail.php?code=${code}`, {
-    credentials: "include"
-})
-    .then(r => r.json())
-    .then((res: BookingDetail & { success: boolean }) => {
+    var loading = document.getElementById("loading") as HTMLElement;
+    var box = document.getElementById("detailBox") as HTMLElement;
+    var slipBox = document.getElementById("slipBox") as HTMLElement;
 
-        loading.style.display = "none";
+    if (!code) {
+        alert("ไม่พบรหัสการจอง");
+        window.location.href = "my-bookings.html";
+        return;
+    }
 
-        if (!res.success) {
-            alert("ไม่พบข้อมูล");
-            return;
-        }
+    fetch("/sports_rental_system/customer/api/get_booking_detail.php?code=" + code, {
+        credentials: "include"
+    })
+        .then(function (r) { return r.json(); })
+        .then(function (res: BookingDetailResponse) {
 
-        box.classList.remove("hidden");
+            loading.style.display = "none";
 
-        const b = res.booking;
+            if (!res.success) {
+                alert("ไม่พบข้อมูล");
+                return;
+            }
 
-        setText("bkCode", b.booking_id);
-        setText("pickup", b.pickup_time);
-        setText("return", b.due_return_time);
-        setText("bookingStatus", b.booking_status);
-        setText("paymentStatus", b.payment_status);
+            box.classList.remove("hidden");
 
-        setText("total", b.total_amount + " บาท");
-        setText("discount", b.discount_amount + " บาท");
-        setText("pointsUsed", b.points_used + " บาท");
-        setText("net", b.net_amount + " บาท");
+            var b = res.booking;
 
-        renderItems(res.items);
-    });
+            setText("bkCode", b.booking_id);
+            setText("pickup", b.pickup_time);
+            setText("return", b.due_return_time);
+            setText("bookingStatus", b.booking_status);
+            setText("paymentStatus", b.payment_status);
 
-function renderItems(items: any[]) {
+            setText("total", formatMoney(b.total_amount));
+            setText("discount", formatMoney(b.discount_amount));
+            setText("pointsUsed", formatMoney(b.points_used_value || 0));
+            setText("net", formatMoney(b.net_amount));
 
-    const list = document.getElementById("itemList")!;
-    list.innerHTML = "";
+            var start = new Date(b.pickup_time).getTime();
+            var end = new Date(b.due_return_time).getTime();
+            var hours = Math.ceil((end - start) / (1000 * 60 * 60));
+            if (hours < 1) hours = 1;
 
-    items.forEach(i => {
+            renderItems(res.items, hours);
+            renderPayment(b, slipBox);
 
-        const div = document.createElement("div");
-        div.className = "item";
+        })
+        .catch(function (err) {
+            console.error("API ERROR:", err);
+            alert("โหลดข้อมูลไม่สำเร็จ");
+        });
 
-        div.innerHTML = `
-            <strong>${i.name}</strong>
-            (${i.item_type})<br>
-            จำนวน: ${i.quantity} | ราคา: ${i.price_at_booking}
-        `;
+    loadProfilePoints();
+});
 
-        list.appendChild(div);
-    });
+
+// ==============================
+// PAYMENT DISPLAY
+// ==============================
+
+function renderPayment(b: any, slipBox: HTMLElement) {
+
+    slipBox.classList.add("hidden");
+    slipBox.innerHTML = "";
+
+    if (b.slip_url && b.payment_method === "QR") {
+
+        var slipPath = fixPath(b.slip_url);
+
+        slipBox.innerHTML =
+            '<span>สลิปการชำระเงิน</span>' +
+            '<div>' +
+            '<a href="' + slipPath + '" target="_blank">' +
+            '<img src="' + slipPath + '" style="max-width:300px; margin-top:10px;" />' +
+            '</a>' +
+            '</div>';
+
+        slipBox.classList.remove("hidden");
+        return;
+    }
+
+    if (b.payment_method === "CASH") {
+
+        slipBox.innerHTML =
+            '<span>การชำระเงิน</span>' +
+            '<div class="payment-msg cash">' +
+            'ชำระด้วยเงินสด' +
+            '</div>';
+
+        slipBox.classList.remove("hidden");
+        return;
+    }
+
+    if (b.payment_method === "CREDIT_CARD") {
+
+        slipBox.innerHTML =
+            '<span>การชำระเงิน</span>' +
+            '<div class="payment-msg credit">' +
+            'ชำระผ่านบัตรเครดิต' +
+            '</div>';
+
+        slipBox.classList.remove("hidden");
+    }
 }
 
+
+// ==============================
+// RENDER ITEMS
+// ==============================
+
+function renderItems(items: any[], hours: number) {
+
+    var list = document.getElementById("itemList") as HTMLElement;
+    list.innerHTML = "";
+
+    for (var i = 0; i < items.length; i++) {
+
+        var item = items[i];
+        var div = document.createElement("div");
+        div.className = "item";
+
+        var totalPrice = Number(item.price) * hours;
+        var imagePath = fixPath(item.image);
+
+        div.innerHTML =
+            '<img src="' + imagePath + '" class="item-img" alt="' + item.name + '">' +
+            '<div class="item-info">' +
+            '<strong>' + item.name + '</strong> (' + item.type + ')<br>' +
+            'จำนวน: ' + item.qty + ' | ' +
+            'ชั่วโมงที่เช่า: ' + hours + ' ชม. | ' +
+            'ราคา: ' + item.price + ' x ' + hours + ' = ' +
+            '<b>' + totalPrice.toFixed(2) + '</b> บาท' +
+            '</div>';
+
+        list.appendChild(div);
+    }
+}
+
+
+// ==============================
+// FIX PATH (ES5 SAFE)
+// ==============================
+
+function fixPath(path: string): string {
+
+    if (!path) return "";
+
+    path = path.replace(/^\s+|\s+$/g, "");
+    path = path.replace(/\\/g, "/");
+    path = path.replace(/SPORTS_RENTAL_SYSTEM/i, "sports_rental_system");
+
+    if (path.indexOf("/sports_rental_system") !== 0) {
+
+        if (path.indexOf("/") === 0) {
+            path = "/sports_rental_system" + path;
+        } else {
+            path = "/sports_rental_system/" + path;
+        }
+    }
+
+    return path;
+}
+
+
+// ==============================
+// PROFILE POINTS
+// ==============================
+
+function loadProfilePoints() {
+
+    fetch("/sports_rental_system/customer/api/get_profile.php")
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+
+            var pointEl = document.getElementById("topPoints");
+
+            if (pointEl && data.points !== undefined) {
+                pointEl.textContent = "⭐ " + data.points + " คะแนน";
+            }
+
+        })
+        .catch(function (err) {
+            console.error("profile error:", err);
+        });
+}
+
+
+// ==============================
+// UTIL
+// ==============================
+
 function setText(id: string, txt: string) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = txt;
+    var el = document.getElementById(id);
+    if (el) el.textContent = txt || "-";
+}
+
+function formatMoney(n: any): string {
+    var num = Number(n) || 0;
+    return num.toFixed(2) + " บาท";
 }

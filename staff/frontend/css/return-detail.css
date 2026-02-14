@@ -1,0 +1,268 @@
+/* ================= BASE ================= */
+
+body {
+    font-family: "Noto Sans Thai", sans-serif;
+    background: #f3f4f6;
+    margin: 0;
+    padding: 40px 20px;
+}
+
+h2 {
+    max-width: 1000px;
+    margin: 0 auto 30px auto;
+    font-size: 26px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* ================= MAIN CARD ================= */
+
+#detailBox {
+    max-width: 1000px;
+    margin: auto;
+    background: white;
+    padding: 40px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+#bookingCode {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* ================= ITEM ROW ================= */
+
+.return-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 0;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 40px;
+}
+
+.return-row:last-child {
+    border-bottom: none;
+}
+
+.item-left {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    flex: 1;
+}
+
+.item-img {
+    width: 130px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s ease;
+}
+
+.item-img:hover {
+    transform: scale(1.03);
+}
+
+.item-info {
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.item-info strong {
+    font-size: 17px;
+    color: #111827;
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* ================= RIGHT SIDE ================= */
+
+.right-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 250px;
+    gap: 8px;
+}
+
+/* dropdown + icon row */
+.top-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ================= DROPDOWN ================= */
+
+select {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    min-width: 200px;
+    transition: all 0.2s ease;
+}
+
+select:hover {
+    border-color: #2563eb;
+}
+
+select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ================= NOTE ICON ================= */
+
+.note-icon {
+    font-size: 16px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.note-icon:hover {
+    color: #ff7a00;
+    transform: scale(1.15);
+}
+
+/* ================= NOTE INPUT ================= */
+
+.note-input {
+    width: 240px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    resize: vertical;
+}
+
+/* ================= DAMAGE ================= */
+
+.damage-amount {
+    font-size: 13px;
+    font-weight: 600;
+    color: #dc2626;
+}
+
+/* ================= SUMMARY ================= */
+
+.summary {
+    margin-top: 40px;
+    padding: 25px;
+    background: #f9fafb;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+}
+
+.summary h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+#lateInfo {
+    color: #dc2626;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+#penaltySummary {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+#penaltySummary strong {
+    font-size: 20px;
+    color: #111827;
+}
+
+/* ================= BUTTONS ================= */
+
+.action-row {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+}
+
+.btn-confirm {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-confirm:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.btn-cancel {
+    background: #e5e7eb;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #d1d5db;
+}
+
+/* ================= UTIL ================= */
+
+.hidden {
+    display: none;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+    .return-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .right-zone {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .top-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    select {
+        width: 100%;
+    }
+
+    .note-input {
+        width: 100%;
+    }
+
+    .item-left {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item-img {
+        width: 100%;
+        height: auto;
+    }
+}

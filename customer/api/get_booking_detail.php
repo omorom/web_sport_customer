@@ -49,10 +49,15 @@ $stmt = $conn->prepare("
         b.cancelled_at,
         b.cancellation_reason,
 
-        bs.code   AS booking_status,
-        ps.code   AS payment_status,
+        bs.name_th   AS booking_status,
+        ps.name_th  AS payment_status,
 
-        br.name AS branch_name
+        br.name AS branch_name,
+
+        p.slip_url,
+        p.paid_at,
+        pm.code AS payment_method
+
 
     FROM bookings b
     JOIN booking_status bs 
@@ -61,6 +66,9 @@ $stmt = $conn->prepare("
         ON b.payment_status_id = ps.id
     JOIN branches br
         ON b.branch_id = br.branch_id
+    LEFT JOIN payments p ON p.booking_id = b.booking_id
+    LEFT JOIN payment_methods pm ON p.method_id = pm.method_id
+
 
     WHERE b.booking_id = ?
       AND b.customer_id = ?
