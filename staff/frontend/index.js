@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var selectedBranchId = null;
     var selectedCategories = [];
     var searchKeyword = "";
-    localStorage.removeItem("cart");
     // ============================
     // ELEMENTS
     // ============================

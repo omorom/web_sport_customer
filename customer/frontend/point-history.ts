@@ -1,7 +1,7 @@
 interface PointHistoryItem {
     history_id: number;
     booking_id: string;
-    type: string; // earn | redeem
+    type: "earn" | "redeem";
     amount: number;
     description: string;
 }
@@ -35,7 +35,6 @@ fetch("/sports_rental_system/customer/api/get_point_history.php", {
             return;
         }
 
-        // รองรับทั้ง points และ items
         const data =
             Array.isArray(res.points) ? res.points :
             Array.isArray(res.items) ? res.items :
@@ -78,7 +77,7 @@ fetch("/sports_rental_system/customer/api/get_profile.php", {
 
 
 // ============================
-// RENDER FUNCTION
+// RENDER FUNCTION (FIXED)
 // ============================
 
 function renderPoints(items: PointHistoryItem[]) {
@@ -89,20 +88,23 @@ function renderPoints(items: PointHistoryItem[]) {
 
     items.forEach(p => {
 
+        const isEarn = p.type === "earn";
+
+        // เอาค่า absolute ป้องกัน --2
+        const displayAmount = Math.abs(Number(p.amount));
+        const sign = isEarn ? "+" : "-";
+
         const div = document.createElement("div");
         div.className = "item";
 
-        const isPlus = Number(p.amount) > 0;
-        const sign = isPlus ? "+" : "";
-
         div.innerHTML = `
-            <div class="left ${isPlus ? 'text-plus' : 'text-minus'}">
+            <div class="left ${isEarn ? 'text-plus' : 'text-minus'}">
                 <div class="title">${p.description || "-"}</div>
                 <div class="ref">รหัสการเช่า: ${p.booking_id || "-"}</div>
             </div>
 
-            <div class="right ${isPlus ? 'point-plus' : 'point-minus'}">
-                ${sign}${p.amount}
+            <div class="right ${isEarn ? 'point-plus' : 'point-minus'}">
+                ${sign}${displayAmount}
             </div>
         `;
 
@@ -120,6 +122,7 @@ function showEmpty(message: string) {
     if (!box || !list) return;
 
     box.classList.remove("hidden");
+
     list.innerHTML = `
         <div class="empty">
             ${message}

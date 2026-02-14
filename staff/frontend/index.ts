@@ -12,8 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	let selectedCategories: string[] = [];
 	let searchKeyword = "";
 
-	localStorage.removeItem("cart");
-
 	// ============================
 	// ELEMENTS
 	// ============================

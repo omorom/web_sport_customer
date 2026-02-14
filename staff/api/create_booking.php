@@ -6,13 +6,11 @@ session_start();
 require_once "../../database.php";
 
 date_default_timezone_set('Asia/Bangkok');
-
 header("Content-Type: application/json; charset=utf-8");
 
 /* ===============================
    STAFF AUTH
 ================================ */
-
 if (!isset($_SESSION["staff_id"])) {
     echo json_encode([
         "success" => false,
@@ -26,7 +24,6 @@ $staffId = $_SESSION["staff_id"];
 /* ===============================
    READ JSON
 ================================ */
-
 $raw  = file_get_contents("php://input");
 $data = json_decode($raw, true);
 
@@ -41,7 +38,6 @@ if (!$data) {
 /* ===============================
    INPUT
 ================================ */
-
 $cart       = $data["cart"] ?? [];
 $rentDate   = $data["rentDate"] ?? null;
 $timeSlot   = isset($data["timeSlot"]) ? (int)$data["timeSlot"] : null;
@@ -57,20 +53,10 @@ $customerId = $data["customerId"] ?? null;
 /* ===============================
    VALIDATE
 ================================ */
-
-$missing = [];
-
-if (!$customerId) $missing[] = "customerId";
-if (!$branchId)   $missing[] = "branchId";
-if (!$rentDate)   $missing[] = "rentDate";
-if ($timeSlot === null) $missing[] = "timeSlot";
-if (empty($cart)) $missing[] = "cart";
-
-if (!empty($missing)) {
+if (!$customerId || !$branchId || !$rentDate || $timeSlot === null || empty($cart)) {
     echo json_encode([
         "success" => false,
-        "message" => "ข้อมูลไม่ครบ",
-        "missing" => $missing
+        "message" => "ข้อมูลไม่ครบ"
     ]);
     exit;
 }
@@ -80,29 +66,8 @@ $conn->begin_transaction();
 try {
 
     /* ===============================
-       GET MASTER ID
-    ================================ */
-
-    function getIdByCode($conn, $table, $code) {
-        $stmt = $conn->prepare("SELECT id FROM {$table} WHERE code = ? LIMIT 1");
-        $stmt->bind_param("s", $code);
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_assoc();
-        return $res ? (int)$res["id"] : null;
-    }
-
-    $bookingStatusId = getIdByCode($conn, "booking_status", "WAITING_STAFF");
-    $paymentStatusId = getIdByCode($conn, "payment_status", "UNPAID");
-    $bookingTypeId   = getIdByCode($conn, "booking_types", "WALK_IN");
-
-    if (!$bookingStatusId || !$paymentStatusId || !$bookingTypeId) {
-        throw new Exception("ไม่พบ master status/type");
-    }
-
-    /* ===============================
        GENERATE BOOKING CODE
     ================================ */
-
     function generateBookingCode($conn) {
         do {
             $code = "BK" . str_pad(random_int(0, 999999), 6, "0", STR_PAD_LEFT);
@@ -119,14 +84,12 @@ try {
     /* ===============================
        DATETIME
     ================================ */
-
     $pickup = date("Y-m-d H:i:s", strtotime("$rentDate $timeSlot:00"));
     $return = date("Y-m-d H:i:s", strtotime("+$rentHours hours", strtotime($pickup)));
 
     /* ===============================
-       MONEY
+       CALCULATE MONEY
     ================================ */
-
     $totalAmount = 0;
 
     foreach ($cart as $i) {
@@ -139,34 +102,24 @@ try {
     elseif ($rentHours >= 6) $extraHourFee = 300;
 
     $gross = $totalAmount + $extraHourFee;
-    $pointsUsedValue = $usedPoints;
-    $netAmount = max($gross - $couponDiscount - $pointsUsedValue, 0);
+    $netAmount = max($gross - $couponDiscount - $usedPoints, 0);
     $pointsEarned = floor($netAmount / 100);
 
     /* ===============================
        INSERT BOOKINGS
     ================================ */
+    $bookingTypeId   = 1;
+    $bookingStatusId = 1;
+    $paymentStatusId = 1;
 
     $stmt = $conn->prepare("
         INSERT INTO bookings (
-            booking_id, 
-            customer_id, 
-            staff_id, 
-            branch_id,
-            booking_type_id, 
-            booking_status_id, 
-            payment_status_id,
-            pickup_time, 
-            due_return_time, 
-            actual_pickup_time,
-            total_amount, 
-            discount_amount, 
-            extra_hour_fee,
-            net_amount, 
-            coupon_code, 
-            points_used,
-            points_used_value, 
-            points_earned
+            booking_id, customer_id, staff_id, branch_id,
+            booking_type_id, booking_status_id, payment_status_id,
+            pickup_time, due_return_time, actual_pickup_time,
+            total_amount, discount_amount, extra_hour_fee,
+            net_amount, coupon_code, points_used,
+            points_used_value, points_earned
         )
         VALUES (?,?,?,?,?,?,?,?,?,NOW(),?,?,?,?,?,?,?,?)
     ");
@@ -178,7 +131,7 @@ try {
         $pickup, $return,
         $totalAmount, $couponDiscount, $extraHourFee,
         $netAmount, $couponCode,
-        $usedPoints, $pointsUsedValue, $pointsEarned
+        $usedPoints, $usedPoints, $pointsEarned
     );
 
     if (!$stmt->execute()) {
@@ -186,112 +139,107 @@ try {
     }
 
     /* ===============================
-       INSERT DETAILS
+       INSERT BOOKING DETAILS
     ================================ */
-
     $dStmt = $conn->prepare("
         INSERT INTO booking_details
-        (booking_id, item_type, equipment_id, venue_id, quantity, price_at_booking)
-        VALUES (?,?,?,?,?,?)
+        (booking_id, item_type, equipment_id, equipment_instance_id, venue_id, quantity, price_at_booking)
+        VALUES (?,?,?,?,?,?,?)
     ");
 
     foreach ($cart as $item) {
 
         $type = strtolower($item["type"] ?? "");
+
         $equipmentId = null;
+        $equipmentInstanceId = null;
         $venueId = null;
 
         if ($type === "field" || $type === "venue") {
+
             $itemType = "Venue";
             $venueId = $item["id"];
+
         } else {
+
             $itemType = "Equipment";
             $equipmentId = $item["id"];
+            $equipmentInstanceId = $item["instance_code"] ?? null;
+
+            if (!$equipmentInstanceId) {
+                throw new Exception("ยังไม่ได้เลือกหมายเลขอุปกรณ์");
+            }
         }
 
         $qty   = (int)$item["qty"];
         $price = (float)$item["price"];
 
-        $dStmt->bind_param("ssssid",
-            $bookingCode, $itemType,
-            $equipmentId, $venueId,
-            $qty, $price
+        $dStmt->bind_param(
+            "sssssid",
+            $bookingCode,
+            $itemType,
+            $equipmentId,
+            $equipmentInstanceId,
+            $venueId,
+            $qty,
+            $price
         );
 
         if (!$dStmt->execute()) {
-            throw new Exception("booking_details error");
+            throw new Exception($dStmt->error);
         }
     }
 
     /* ===============================
-       COUPON
+       UPDATE POINTS + HISTORY
     ================================ */
 
-    if ($couponCode) {
-
-        $cStmt = $conn->prepare("
-            INSERT INTO coupon_usages
-            (coupon_code, customer_id, booking_id)
-            VALUES (?, ?, ?)
-        ");
-
-        $cStmt->bind_param("sss", $couponCode, $customerId, $bookingCode);
-        $cStmt->execute();
-
-        $uCoupon = $conn->prepare("
-            UPDATE coupons
-            SET used_count = used_count + 1
-            WHERE code = ?
-        ");
-
-        $uCoupon->bind_param("s", $couponCode);
-        $uCoupon->execute();
-    }
-
-    /* ===============================
-       POINTS
-    ================================ */
-
+    // REDEEM
     if ($usedPoints > 0) {
 
-        $u = $conn->prepare("
+        $updatePoint = $conn->prepare("
             UPDATE customers
             SET current_points = current_points - ?
             WHERE customer_id = ?
         ");
+        $updatePoint->bind_param("is", $usedPoints, $customerId);
+        if (!$updatePoint->execute()) {
+            throw new Exception($updatePoint->error);
+        }
 
-        $u->bind_param("is", $usedPoints, $customerId);
-        $u->execute();
-
-        $h = $conn->prepare("
+        $insertHistory = $conn->prepare("
             INSERT INTO point_history
             (customer_id, booking_id, type, amount, description)
             VALUES (?, ?, 'redeem', ?, 'ใช้แต้มแลกส่วนลด')
         ");
-
-        $h->bind_param("ssi", $customerId, $bookingCode, $usedPoints);
-        $h->execute();
+        $insertHistory->bind_param("ssi", $customerId, $bookingCode, $usedPoints);
+        if (!$insertHistory->execute()) {
+            throw new Exception($insertHistory->error);
+        }
     }
 
+    // EARN
     if ($pointsEarned > 0) {
 
-        $u = $conn->prepare("
+        $updateEarn = $conn->prepare("
             UPDATE customers
             SET current_points = current_points + ?
             WHERE customer_id = ?
         ");
+        $updateEarn->bind_param("is", $pointsEarned, $customerId);
+        if (!$updateEarn->execute()) {
+            throw new Exception($updateEarn->error);
+        }
 
-        $u->bind_param("is", $pointsEarned, $customerId);
-        $u->execute();
-
-        $h = $conn->prepare("
+        $insertEarn = $conn->prepare("
             INSERT INTO point_history
             (customer_id, booking_id, type, amount, description)
             VALUES (?, ?, 'earn', ?, 'ได้แต้มจากการเช่า')
         ");
-
-        $h->bind_param("ssi", $customerId, $bookingCode, $pointsEarned);
-        $h->execute();
+        $insertEarn->bind_param("ssi", $customerId, $bookingCode, $pointsEarned);
+        if (!$insertEarn->execute()) {
+            throw new Exception($insertEarn->error);
+        }
     }
 
     $conn->commit();
@@ -313,5 +261,46 @@ try {
         "message" => $e->getMessage()
     ]);
 }
+
+/* ===============================
+   UPDATE EQUIPMENT STATUS
+================================ */
+
+$updateEquip = $conn->prepare("
+    UPDATE equipment_instances
+    SET status = 'Rented',
+        current_location = 'Customer'
+    WHERE instance_code = ?
+    AND status = 'Ready'
+");
+
+if (!$updateEquip) {
+    throw new Exception($conn->error);
+}
+
+foreach ($cart as $item) {
+
+    $type = strtolower($item["type"] ?? "");
+
+    if ($type === "equipment") {
+
+        $instanceCode = $item["instance_code"] ?? null;
+
+        if (!$instanceCode) {
+            throw new Exception("ไม่พบ instance_code");
+        }
+
+        $updateEquip->bind_param("s", $instanceCode);
+
+        if (!$updateEquip->execute()) {
+            throw new Exception($updateEquip->error);
+        }
+
+        if ($updateEquip->affected_rows === 0) {
+            throw new Exception("อุปกรณ์ถูกใช้งานอยู่แล้ว");
+        }
+    }
+}
+
 
 $conn->close();

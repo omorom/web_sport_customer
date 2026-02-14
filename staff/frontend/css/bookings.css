@@ -395,6 +395,26 @@ body {
     }
 }
 
+/* ===============================
+   REFUND BUTTON
+================================ */
+/* ================= REFUND ================= */
+
+.btn-refund {
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.btn-refund:hover {
+    background: #b91c1c;
+}
+
 
 /* ================= RESPONSIVE ================= */
 

@@ -20,7 +20,6 @@ const tabs =
 /* ================= STATE ================= */
 
 let pendingCancelId: string | null = null;
-
 let allBookings: Booking[] = [];
 let currentStatus = "WAITING_STAFF";
 
@@ -45,7 +44,6 @@ function fetchBookings(): void {
         .then(res => {
 
             if (!res.success) {
-
                 bookingList.innerHTML =
                     `<p class="empty">${res.message || "ไม่พบข้อมูล"}</p>`;
                 return;
@@ -56,10 +54,7 @@ function fetchBookings(): void {
             updateCounts();
             renderList(currentStatus);
         })
-        .catch(err => {
-
-            console.error(err);
-
+        .catch(() => {
             bookingList.innerHTML =
                 `<p class="empty">โหลดข้อมูลไม่สำเร็จ</p>`;
         });
@@ -88,20 +83,6 @@ function updateCounts(): void {
         });
 }
 
-/* ================= HELPER ================= */
-
-function getBookingById(id: string): Booking | null {
-
-    for (let i = 0; i < allBookings.length; i++) {
-
-        if (allBookings[i].booking_id === id) {
-            return allBookings[i];
-        }
-    }
-
-    return null;
-}
-
 /* ================= RENDER ================= */
 
 function renderList(status: string): void {
@@ -114,7 +95,6 @@ function renderList(status: string): void {
         );
 
     if (list.length === 0) {
-
         bookingList.innerHTML =
             `<p class="empty">ไม่มีรายการ</p>`;
         return;
@@ -134,7 +114,7 @@ function renderList(status: string): void {
 
         if (status === "CANCELLED") {
             badge = "cancel";
-            text = "ยกเลิกแล้ว";
+            text = "คำขอยกเลิก";
         }
 
         html += `
@@ -162,36 +142,38 @@ function renderList(status: string): void {
 
                 <div class="booking-actions">
 
-    <a class="btn-outline"
-        href="booking-detail.html?code=${b.booking_id}">
-        ดูรายละเอียด
-    </a>
-
-    ${status === "WAITING_STAFF"
-                ? `
-                <button class="btn-approve"
-                    data-id="${b.booking_id}">
-                    อนุมัติ
-                </button>
-
-                <button class="btn-cancel"
-                    data-id="${b.booking_id}">
-                    ยกเลิก
-                </button>
-            `
-                : status === "CONFIRMED_WAITING_PICKUP"
-                    ? `
-                    <a
-                        href="receive-equipment.html?code=${b.booking_id}"
-                        class="btn-approve">
-                        กรอกอุปกรณ์
+                    <a class="btn-outline"
+                        href="booking-detail.html?code=${b.booking_id}">
+                        ดูรายละเอียด
                     </a>
-                `
-                    : ""
-            }
 
-</div>
+                    ${status === "WAITING_STAFF" ? `
+                        <button class="btn-approve"
+                            data-id="${b.booking_id}">
+                            อนุมัติ
+                        </button>
 
+                        <button class="btn-cancel"
+                            data-id="${b.booking_id}">
+                            ยกเลิก
+                        </button>
+                    ` : ""}
+
+                    ${status === "CONFIRMED_WAITING_PICKUP" ? `
+                        <a href="receive-equipment.html?code=${b.booking_id}"
+                           class="btn-approve">
+                            กรอกอุปกรณ์
+                        </a>
+                    ` : ""}
+
+                    ${status === "CANCELLED" ? `
+                        <button class="btn-refund"
+                            data-id="${b.booking_id}">
+                            ยืนยันการคืนเงิน
+                        </button>
+                    ` : ""}
+
+                </div>
 
             </div>
         `;
@@ -206,8 +188,8 @@ function renderList(status: string): void {
 
 function bindActionButtons(): void {
 
-    document
-        .querySelectorAll(".btn-approve")
+    // APPROVE
+    document.querySelectorAll(".btn-approve")
         .forEach(btn => {
 
             btn.addEventListener("click", () => {
@@ -223,8 +205,8 @@ function bindActionButtons(): void {
             });
         });
 
-    document
-        .querySelectorAll(".btn-cancel")
+    // CANCEL
+    document.querySelectorAll(".btn-cancel")
         .forEach(btn => {
 
             btn.addEventListener("click", () => {
@@ -238,6 +220,23 @@ function bindActionButtons(): void {
                 openCancelModal();
             });
         });
+
+    // REFUND
+    document.querySelectorAll(".btn-refund")
+        .forEach(btn => {
+
+            btn.addEventListener("click", () => {
+
+                const id =
+                    (btn as HTMLElement).dataset.id;
+
+                if (!id) return;
+
+                if (!confirm("ยืนยันการคืนเงินใช่หรือไม่?")) return;
+
+                confirmRefund(id);
+            });
+        });
 }
 
 /* ================= APPROVE ================= */
@@ -247,8 +246,7 @@ function approveBooking(id: string): void {
     fetch("/sports_rental_system/staff/api/approve_booking.php", {
         method: "POST",
         headers: {
-            "Content-Type":
-                "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded"
         },
         credentials: "include",
         body: `booking_id=${encodeURIComponent(id)}`
@@ -261,25 +259,42 @@ function approveBooking(id: string): void {
                 return;
             }
 
-            const target = getBookingById(id);
+            fetchBookings();
+        })
+        .catch(() => alert("เชื่อมต่อไม่ได้"));
+}
 
-            if (target) {
-                target.status_code =
-                    "CONFIRMED_WAITING_PICKUP";
+/* ================= REFUND ================= */
+
+function confirmRefund(id: string): void {
+
+    fetch("/sports_rental_system/staff/api/confirm_cancel_refund.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            booking_code: id
+        })
+    })
+        .then(r => r.json())
+        .then(res => {
+
+            if (!res.success) {
+                alert(res.message || "คืนเงินไม่สำเร็จ");
+                return;
             }
 
-            updateCounts();
-            renderList(currentStatus);
+            alert("คืนเงินสำเร็จ");
+            fetchBookings();
         })
         .catch(() => alert("เชื่อมต่อไม่ได้"));
 }
 
 /* ================= CANCEL ================= */
 
-function cancelBooking(
-    id: string,
-    reason: string
-): void {
+function cancelBooking(id: string, reason: string): void {
 
     fetch("/sports_rental_system/staff/api/cancel_booking.php", {
         method: "POST",
@@ -300,14 +315,7 @@ function cancelBooking(
                 return;
             }
 
-            const target = getBookingById(id);
-
-            if (target) {
-                target.status_code = "CANCELLED";
-            }
-
-            updateCounts();
-            renderList(currentStatus);
+            fetchBookings();
         })
         .catch(() => alert("เชื่อมต่อไม่ได้"));
 }
@@ -342,63 +350,41 @@ const cancelModal =
     document.getElementById("cancelModal") as HTMLElement;
 
 const cancelReasonInput =
-    document.getElementById(
-        "cancelReasonInput"
-    ) as HTMLTextAreaElement;
+    document.getElementById("cancelReasonInput") as HTMLTextAreaElement;
 
 const cancelModalClose =
-    document.getElementById(
-        "cancelModalClose"
-    ) as HTMLButtonElement;
+    document.getElementById("cancelModalClose") as HTMLButtonElement;
 
 const cancelModalConfirm =
-    document.getElementById(
-        "cancelModalConfirm"
-    ) as HTMLButtonElement;
+    document.getElementById("cancelModalConfirm") as HTMLButtonElement;
 
 function openCancelModal(): void {
 
-    if (!cancelModal) return;
-
     cancelReasonInput.value = "";
-
     cancelModal.classList.remove("hidden");
-
     cancelReasonInput.focus();
 }
 
 function closeCancelModal(): void {
 
-    if (!cancelModal) return;
-
     cancelModal.classList.add("hidden");
-
     pendingCancelId = null;
 }
 
-/* bind modal buttons */
+cancelModalClose.addEventListener("click", closeCancelModal);
 
-cancelModalClose.addEventListener(
-    "click",
-    closeCancelModal
-);
+cancelModalConfirm.addEventListener("click", () => {
 
-cancelModalConfirm.addEventListener(
-    "click",
-    () => {
+    if (!pendingCancelId) return;
 
-        if (!pendingCancelId) return;
+    const reason =
+        cancelReasonInput.value.trim();
 
-        const reason =
-            cancelReasonInput.value.trim();
-
-        if (!reason) {
-            alert("กรุณากรอกเหตุผล");
-            return;
-        }
-
-        cancelBooking(pendingCancelId, reason);
-
-        closeCancelModal();
+    if (!reason) {
+        alert("กรุณากรอกเหตุผล");
+        return;
     }
-);
+
+    cancelBooking(pendingCancelId, reason);
+    closeCancelModal();
+});

@@ -30,7 +30,7 @@ $conn->begin_transaction();
 try {
 
     /* ===============================
-       GET BOOKING
+       LOCK BOOKING
     ================================ */
 
     $stmt = $conn->prepare("
@@ -59,12 +59,9 @@ try {
     $now = new DateTime();
 
     if ($now > $dueDate) {
-
         $secondsLate = $now->getTimestamp() - $dueDate->getTimestamp();
 
-        // เกิน 1 ชั่วโมงก่อน ถึงเริ่มคิด
         if ($secondsLate > 3600) {
-
             $daysLate = floor(($secondsLate - 3600) / 86400) + 1;
             $lateFee = $daysLate * 50;
         }
@@ -78,47 +75,48 @@ try {
 
     foreach ($items as $item) {
 
-        $detailId = $item["detail_id"];
-        $conditionId = $item["condition_id"];
+        $detailId    = (int)$item["detail_id"];
+        $conditionId = (int)$item["condition_id"];
+        $note        = $item["note"] ?? null;
 
-        $stmt = $conn->prepare("
+        /* ===== GET BOOKING DETAIL ===== */
+
+        $detailStmt = $conn->prepare("
             SELECT equipment_instance_id, price_at_booking
             FROM booking_details
             WHERE detail_id = ?
         ");
-        $stmt->bind_param("i", $detailId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $detail = $res->fetch_assoc();
-        $stmt->close();
+        $detailStmt->bind_param("i", $detailId);
+        $detailStmt->execute();
+        $detailRes = $detailStmt->get_result();
+        $detail = $detailRes->fetch_assoc();
+        $detailStmt->close();
 
         if (!$detail) continue;
 
         $instanceCode = $detail["equipment_instance_id"];
-        $price = $detail["price_at_booking"];
+        $price        = (float)$detail["price_at_booking"];
 
-        /* ===== fine percent ===== */
+        /* ===== GET CONDITION ===== */
 
-        $stmt = $conn->prepare("
+        $condStmt = $conn->prepare("
             SELECT fine_percent
             FROM return_conditions
             WHERE condition_id = ?
         ");
-        $stmt->bind_param("i", $conditionId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $cond = $res->fetch_assoc();
-        $stmt->close();
+        $condStmt->bind_param("i", $conditionId);
+        $condStmt->execute();
+        $condRes = $condStmt->get_result();
+        $cond = $condRes->fetch_assoc();
+        $condStmt->close();
 
         if ($cond) {
             $damageFee += ($price * $cond["fine_percent"] / 100);
         }
 
-        /* ===== Save return condition ===== */
+        /* ===== INSERT RETURN ASSIGNMENT ===== */
 
-        $note = $item["note"] ?? null;
-
-        $stmt = $conn->prepare("
+        $assignStmt = $conn->prepare("
             INSERT INTO booking_item_assignments
             (detail_id, instance_code, return_condition_id, note)
             VALUES (?, ?, ?, ?)
@@ -127,7 +125,7 @@ try {
                 note = VALUES(note)
         ");
 
-        $stmt->bind_param(
+        $assignStmt->bind_param(
             "isis",
             $detailId,
             $instanceCode,
@@ -135,54 +133,76 @@ try {
             $note
         );
 
-        /* ===== คืนอุปกรณ์ ===== */
+        if (!$assignStmt->execute()) {
+            throw new Exception("ASSIGN ERROR: " . $assignStmt->error);
+        }
 
-        if ($instanceCode) {
-            $stmt = $conn->prepare("
+        $assignStmt->close();
+
+        /* ===== UPDATE EQUIPMENT INSTANCE ===== */
+
+        if (!empty($instanceCode)) {
+
+            $updateEquip = $conn->prepare("
                 UPDATE equipment_instances
                 SET status = 'Ready',
                     current_location = 'Main Storage'
                 WHERE instance_code = ?
             ");
-            $stmt->bind_param("s", $instanceCode);
-            $stmt->execute();
-            $stmt->close();
+
+            $updateEquip->bind_param("s", $instanceCode);
+
+            if (!$updateEquip->execute()) {
+                throw new Exception($updateEquip->error);
+            }
+
+            $updateEquip->close();
         }
     }
 
     $totalPenalty = $lateFee + $damageFee;
 
     /* ===============================
-       UPDATE STATUS
+       UPDATE BOOKING STATUS
     ================================ */
 
     $statusCode = ($totalPenalty <= 0)
         ? "COMPLETED"
         : "RETURNING";
 
-    $stmt = $conn->prepare("
+    $statusStmt = $conn->prepare("
         SELECT id FROM booking_status WHERE code = ?
     ");
-    $stmt->bind_param("s", $statusCode);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    $status = $res->fetch_assoc();
-    $stmt->close();
+    $statusStmt->bind_param("s", $statusCode);
+    $statusStmt->execute();
+    $statusRes = $statusStmt->get_result();
+    $status = $statusRes->fetch_assoc();
+    $statusStmt->close();
 
     if (!$status) {
         throw new Exception("ไม่พบ booking status: " . $statusCode);
     }
 
-    $stmt = $conn->prepare("
+    $updateBooking = $conn->prepare("
         UPDATE bookings
         SET booking_status_id = ?,
             actual_return_time = NOW(),
             penalty_fee = ?
         WHERE booking_id = ?
     ");
-    $stmt->bind_param("ids", $status["id"], $totalPenalty, $bookingCode);
-    $stmt->execute();
-    $stmt->close();
+
+    $updateBooking->bind_param(
+        "ids",
+        $status["id"],
+        $totalPenalty,
+        $bookingCode
+    );
+
+    if (!$updateBooking->execute()) {
+        throw new Exception($updateBooking->error);
+    }
+
+    $updateBooking->close();
 
     $conn->commit();
 

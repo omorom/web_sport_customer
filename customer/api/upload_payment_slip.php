@@ -137,7 +137,7 @@ try {
         $log = $conn->prepare("
             INSERT INTO point_history
             (customer_id, booking_id, type, amount, description)
-            VALUES (?, ?, 'use', ?, 'ได้แต้มจากการเช่า')
+            VALUES (?, ?, 'use', ?, 'ใช้แต้มจากการเช่า')
         ");
 
         $log->bind_param("ssi", $customerId, $bookingCode, $minus);

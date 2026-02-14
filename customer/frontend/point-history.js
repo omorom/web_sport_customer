@@ -16,7 +16,6 @@ fetch("/sports_rental_system/customer/api/get_point_history.php", {
         showEmpty("ไม่พบข้อมูลประวัติแต้ม");
         return;
     }
-    // รองรับทั้ง points และ items
     var data = Array.isArray(res.points) ? res.points :
         Array.isArray(res.items) ? res.items :
             [];
@@ -51,18 +50,20 @@ fetch("/sports_rental_system/customer/api/get_profile.php", {
     console.error("Error loading profile:", err);
 });
 // ============================
-// RENDER FUNCTION
+// RENDER FUNCTION (FIXED)
 // ============================
 function renderPoints(items) {
     if (!list)
         return;
     list.innerHTML = "";
     items.forEach(function (p) {
+        var isEarn = p.type === "earn";
+        // เอาค่า absolute ป้องกัน --2
+        var displayAmount = Math.abs(Number(p.amount));
+        var sign = isEarn ? "+" : "-";
         var div = document.createElement("div");
         div.className = "item";
-        var isPlus = Number(p.amount) > 0;
-        var sign = isPlus ? "+" : "";
-        div.innerHTML = "\n            <div class=\"left ".concat(isPlus ? 'text-plus' : 'text-minus', "\">\n                <div class=\"title\">").concat(p.description || "-", "</div>\n                <div class=\"ref\">\u0E23\u0E2B\u0E31\u0E2A\u0E01\u0E32\u0E23\u0E40\u0E0A\u0E48\u0E32: ").concat(p.booking_id || "-", "</div>\n            </div>\n\n            <div class=\"right ").concat(isPlus ? 'point-plus' : 'point-minus', "\">\n                ").concat(sign).concat(p.amount, "\n            </div>\n        ");
+        div.innerHTML = "\n            <div class=\"left ".concat(isEarn ? 'text-plus' : 'text-minus', "\">\n                <div class=\"title\">").concat(p.description || "-", "</div>\n                <div class=\"ref\">\u0E23\u0E2B\u0E31\u0E2A\u0E01\u0E32\u0E23\u0E40\u0E0A\u0E48\u0E32: ").concat(p.booking_id || "-", "</div>\n            </div>\n\n            <div class=\"right ").concat(isEarn ? 'point-plus' : 'point-minus', "\">\n                ").concat(sign).concat(displayAmount, "\n            </div>\n        ");
         list.appendChild(div);
     });
 }
