@@ -54,18 +54,19 @@ function loadHistory() {
         renderHistory(res.items);
     });
 }
+// ส่วนดึงคะแนน Profile (คงเดิม)
 fetch("/sports_rental_system/customer/api/get_profile.php")
     .then(function (res) { return res.json(); })
     .then(function (data) {
     var pointEl = document.getElementById("topPoints");
     if (pointEl && data.points !== undefined) {
-        pointEl.textContent =
-            "\u2B50 ".concat(data.points, " \u0E04\u0E30\u0E41\u0E19\u0E19");
+        pointEl.textContent = "\u2B50 ".concat(data.points, " \u0E04\u0E30\u0E41\u0E19\u0E19");
     }
 });
 function renderHistory(items) {
     var list = document.getElementById("historyList");
     list.innerHTML = "";
+    // กรองเฉพาะรายการที่เสร็จสิ้นหรือยกเลิก
     var completedItems = items.filter(function (b) {
         return b.status_code === "COMPLETED" ||
             b.status_code === "CANCELLED";
@@ -78,83 +79,55 @@ function renderHistory(items) {
         var div = document.createElement("div");
         div.className = "history-item";
         var hours = getHours(b.pickup_time, b.due_return_time);
-        var paymentText = "";
-        var paymentClass = "";
-        switch (b.payment_status_code) {
-            case "UNPAID":
-                paymentText = "ยังไม่ได้ชำระเงิน";
-                paymentClass = "payment-unpaid";
-                break;
-            case "WAITING_VERIFY":
-                paymentText = "รอตรวจสอบสลิป";
-                paymentClass = "payment-waiting";
-                break;
-            case "PAID":
-                paymentText = "ชำระเงินสำเร็จ";
-                paymentClass = "payment-success";
-                break;
-            case "REJECTED":
-                paymentText = "สลิปไม่ผ่าน";
-                paymentClass = "payment-rejected";
-                break;
-            case "REFUNDED":
-                paymentText = "คืนเงินแล้ว";
-                paymentClass = "payment-refund";
-                break;
-            case "CANCELLED":
-                paymentText = "ยกเลิก";
-                paymentClass = "payment-cancel";
-                break;
-            case "EXPIRED":
-                paymentText = "หมดเวลาชำระเงิน";
-                paymentClass = "payment-expired";
-                break;
-            default:
-                paymentText = "ไม่ทราบสถานะ";
-                paymentClass = "payment-default";
-        }
-        div.innerHTML = "\n            <div class=\"history-left\">\n                <img \n                    src=\"".concat(b.equipment_image, "\" \n                    alt=\"").concat(b.equipment_name, "\"\n                    class=\"history-img\"\n                >\n                <div class=\"history-info\">      \n                    <div><strong>\u0E23\u0E2B\u0E31\u0E2A\u0E01\u0E32\u0E23\u0E08\u0E2D\u0E07:</strong> ").concat(b.booking_id, "</div>\n                    <div><strong>\u0E2D\u0E38\u0E1B\u0E01\u0E23\u0E13\u0E4C:</strong> ").concat(b.equipment_name, "\n                    ").concat(b.instance_code ? "(".concat(b.instance_code, ")") : "", "</div>\n                    <div><strong>\u0E08\u0E33\u0E19\u0E27\u0E19:</strong> ").concat(b.quantity, " \u0E0A\u0E34\u0E49\u0E19 | <strong>\u0E40\u0E27\u0E25\u0E32:</strong> ").concat(hours, " \u0E0A\u0E21.</div>\n                    <div><strong>\u0E22\u0E2D\u0E14\u0E0A\u0E33\u0E23\u0E30:</strong> ").concat(b.net_amount, " \u0E1A\u0E32\u0E17</div>\n                    <div><strong>\u0E2A\u0E16\u0E32\u0E19\u0E30:</strong> ").concat(b.status_name, "</div>\n                    <div>\n                        <strong>\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E01\u0E32\u0E23\u0E0A\u0E33\u0E23\u0E30\u0E40\u0E07\u0E34\u0E19:</strong>\n                        <span class=\"payment-status ").concat(paymentClass, "\">\n                            ").concat(paymentText, "\n                        </span>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"history-right\">\n                ").concat(!(b.status_code === "COMPLETED" || b.status_code === "CANCELLED")
+        // กำหนด class และ text สำหรับสถานะการชำระเงิน (เหมือนเดิม)
+        var paymentInfo = getPaymentStatusUI(b.payment_status_code);
+        div.innerHTML = "\n            <div class=\"history-left\">\n                <img \n                    src=\"".concat(b.display_image, "\" \n                    alt=\"").concat(b.display_name, "\"\n                    class=\"history-img\"\n                >\n                <div class=\"history-info\">      \n                    <div><strong>\u0E23\u0E2B\u0E31\u0E2A\u0E01\u0E32\u0E23\u0E08\u0E2D\u0E07:</strong> ").concat(b.booking_id, "</div>\n                    <div>\n                        <strong>").concat(b.item_type === 'Venue' ? 'สนาม' : 'อุปกรณ์', ":</strong> \n                        ").concat(b.display_name, " \n                        ").concat(b.instance_code ? "(".concat(b.instance_code, ")") : "", "\n                    </div>\n                    <div><strong>\u0E08\u0E33\u0E19\u0E27\u0E19:</strong> ").concat(b.quantity, " ").concat(b.item_type === 'Venue' ? 'สนาม' : 'ชิ้น', " | <strong>\u0E40\u0E27\u0E25\u0E32:</strong> ").concat(hours, " \u0E0A\u0E21.</div>\n                    <div><strong>\u0E22\u0E2D\u0E14\u0E0A\u0E33\u0E23\u0E30:</strong> ").concat(b.net_amount, " \u0E1A\u0E32\u0E17</div>\n                    <div><strong>\u0E2A\u0E16\u0E32\u0E19\u0E30:</strong> ").concat(b.status_name, "</div>\n                    <div>\n                        <strong>\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E01\u0E32\u0E23\u0E0A\u0E33\u0E23\u0E30\u0E40\u0E07\u0E34\u0E19:</strong>\n                        <span class=\"payment-status ").concat(paymentInfo.class, "\">\n                            ").concat(paymentInfo.text, "\n                        </span>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"history-right\">\n                ").concat(!(b.status_code === "COMPLETED" || b.status_code === "CANCELLED")
             ? "<p style=\"color: gray;\">\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E23\u0E35\u0E27\u0E34\u0E27\u0E44\u0E14\u0E49</p>"
             : b.is_reviewed ?
-                "\n                        <div class=\"review-display\">\n                            <div class=\"review-text\">\n                                ".concat(b.review_text || "", "\n                            </div>\n                            <p style=\"color: green; margin-top:5px;\">\u2714 \u0E23\u0E35\u0E27\u0E34\u0E27\u0E41\u0E25\u0E49\u0E27</p>\n                        </div>\n                        ")
+                "\n                        <div class=\"review-display\">\n                            <div class=\"review-text\">".concat(b.review_text || "", "</div>\n                            <p style=\"color: green; margin-top:5px;\">\u2714 \u0E23\u0E35\u0E27\u0E34\u0E27\u0E41\u0E25\u0E49\u0E27</p>\n                        </div>\n                    ")
                 :
-                    "\n                    <div class=\"star-rating\">\n                        <span class=\"star\" data-value=\"1\">&#9733;</span>\n                        <span class=\"star\" data-value=\"2\">&#9733;</span>\n                        <span class=\"star\" data-value=\"3\">&#9733;</span>\n                        <span class=\"star\" data-value=\"4\">&#9733;</span>\n                        <span class=\"star\" data-value=\"5\">&#9733;</span>\n                    </div>\n                    <input type=\"hidden\" class=\"rating-value\" value=\"5\">\n                    <textarea placeholder=\"\u0E40\u0E02\u0E35\u0E22\u0E19\u0E23\u0E35\u0E27\u0E34\u0E27\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13...\" class=\"review-box\"></textarea>\n                    <button class=\"review-btn\">\u0E2A\u0E48\u0E07\u0E23\u0E35\u0E27\u0E34\u0E27</button>\n                ", "\n        </div>\n\n            ");
-        if ((b.status_code === "COMPLETED" || b.status_code === "CANCELLED")
-            && !b.is_reviewed) {
-            var btn = div.querySelector(".review-btn");
-            var textarea_1 = div.querySelector(".review-box");
-            var ratingInput_1 = div.querySelector(".rating-value");
-            var stars_1 = div.querySelectorAll(".star");
-            updateStars(5);
-            stars_1.forEach(function (star) {
-                star.addEventListener("mouseover", function () {
-                    var value = star.dataset.value;
-                    highlightStars(value);
-                });
-                star.addEventListener("mouseout", function () {
-                    highlightStars(ratingInput_1.value);
-                });
-                star.addEventListener("click", function () {
-                    var value = star.dataset.value;
-                    ratingInput_1.value = value;
-                    updateStars(parseInt(value));
-                });
-            });
-            function highlightStars(value) {
-                stars_1.forEach(function (s) {
-                    s.classList.toggle("hover", parseInt(s.dataset.value) <= Number(value));
-                });
-            }
-            function updateStars(value) {
-                stars_1.forEach(function (s) {
-                    s.classList.toggle("selected", parseInt(s.dataset.value) <= value);
-                });
-            }
-            btn.onclick = function () {
-                submitReview(b, textarea_1, ratingInput_1);
-            };
+                    "\n                    <div class=\"star-rating\">\n                        <span class=\"star\" data-value=\"1\">&#9733;</span>\n                        <span class=\"star\" data-value=\"2\">&#9733;</span>\n                        <span class=\"star\" data-value=\"3\">&#9733;</span>\n                        <span class=\"star\" data-value=\"4\">&#9733;</span>\n                        <span class=\"star\" data-value=\"5\">&#9733;</span>\n                    </div>\n                    <input type=\"hidden\" class=\"rating-value\" value=\"5\">\n                    <textarea placeholder=\"\u0E40\u0E02\u0E35\u0E22\u0E19\u0E23\u0E35\u0E27\u0E34\u0E27\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13...\" class=\"review-box\"></textarea>\n                    <button class=\"review-btn\">\u0E2A\u0E48\u0E07\u0E23\u0E35\u0E27\u0E34\u0E27</button>\n                ", "\n            </div>\n        ");
+        // จัดการ Event สำหรับการส่งรีวิว (เหมือนเดิมแต่ส่ง b เข้าไปใน submitReview)
+        if ((b.status_code === "COMPLETED" || b.status_code === "CANCELLED") && !b.is_reviewed) {
+            setupReviewEvents(div, b);
         }
         list.appendChild(div);
+    });
+}
+// ฟังก์ชันช่วยจัดการสถานะการชำระเงิน
+function getPaymentStatusUI(code) {
+    var statusMap = {
+        "UNPAID": { text: "ยังไม่ได้ชำระเงิน", class: "payment-unpaid" },
+        "WAITING_VERIFY": { text: "รอตรวจสอบสลิป", class: "payment-waiting" },
+        "PAID": { text: "ชำระเงินสำเร็จ", class: "payment-success" },
+        "REJECTED": { text: "สลิปไม่ผ่าน", class: "payment-rejected" },
+        "REFUNDED": { text: "คืนเงินแล้ว", class: "payment-refund" },
+        "CANCELLED": { text: "ยกเลิก", class: "payment-cancel" },
+        "EXPIRED": { text: "หมดเวลาชำระเงิน", class: "payment-expired" }
+    };
+    return statusMap[code] || { text: "ไม่ทราบสถานะ", class: "payment-default" };
+}
+// ฟังก์ชันแยกสำหรับจัดการดาวและการส่งรีวิว
+function setupReviewEvents(div, item) {
+    var btn = div.querySelector(".review-btn");
+    var textarea = div.querySelector(".review-box");
+    var ratingInput = div.querySelector(".rating-value");
+    var stars = div.querySelectorAll(".star");
+    stars.forEach(function (star) {
+        star.addEventListener("click", function () {
+            var value = star.dataset.value;
+            ratingInput.value = value;
+            updateStars(stars, parseInt(value));
+        });
+    });
+    btn.onclick = function () {
+        submitReview(item, textarea, ratingInput);
+    };
+}
+function updateStars(stars, value) {
+    stars.forEach(function (s) {
+        var starVal = parseInt(s.dataset.value);
+        s.classList.toggle("selected", starVal <= value);
     });
 }
 function getHours(start, end) {
@@ -165,7 +138,6 @@ function getHours(start, end) {
 function submitReview(item, textarea, ratingInput) {
     var _this = this;
     var reviewText = textarea.value.trim();
-    var rating = ratingInput.value;
     var ratingValue = Number(ratingInput.value);
     if (!reviewText) {
         alert("กรุณาเขียนรีวิวก่อนส่ง");
@@ -178,11 +150,11 @@ function submitReview(item, textarea, ratingInput) {
     var payload = {
         booking_id: item.booking_id,
         detail_id: Number(item.detail_id),
-        instance_code: item.instance_code,
+        instance_code: item.instance_code || null,
+        venue_id: item.venue_id || null, // ตอนนี้ TypeScript จะไม่ฟ้อง error แล้ว
         review_text: reviewText,
         rating: ratingValue
     };
-    console.log("Payload:", payload);
     fetch("/sports_rental_system/customer/api/add_review.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -200,7 +172,6 @@ function submitReview(item, textarea, ratingInput) {
                         return [2 /*return*/, JSON.parse(text)];
                     }
                     catch (e) {
-                        console.error("PHP Error Detected:", text);
                         throw new Error("เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ: " + text.substring(0, 100));
                     }
                     return [2 /*return*/];
