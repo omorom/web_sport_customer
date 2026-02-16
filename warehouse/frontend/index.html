@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ระบบจัดการคลังอุปกรณ์กีฬา</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/equipment.css" />
+</head>
+
+<body id="equipmentPage">
+
+  <!-- ================= HEADER ================= -->
+  <header class="main-header">
+
+    <div class="header-top">
+
+      <div class="brand">
+        <span class="brand-name">ระบบจัดการคลังอุปกรณ์กีฬา</span>
+        <small>Sports Equipment Management System</small>
+      </div>
+
+      <div class="staff-zone">
+        <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+      </div>
+
+    </div>
+
+    <div class="header-bottom">
+      <nav class="main-nav">
+        <a href="index.html" class="nav-item active">คลังอุปกรณ์</a>
+        <a href="management.html" class="nav-item">จัดการอุปกรณ์</a>
+        <a href="history.html" class="nav-item">คืนอุปกรณ์</a>
+        <a href="history_point.html" class="nav-item">สถานะอุปกรณ์</a>
+      </nav>
+    </div>
+
+    <div class="booking-bar">
+      <div class="booking-inner">
+
+        <div class="branch-display" style="cursor: default;">
+          📍 สาขา: <strong id="selectedBranch">กำลังโหลด...</strong>
+        </div>
+
+      </div>
+    </div>
+
+  </header>
+
+  <!-- ================= MAIN ================= -->
+
+  <div class="container">
+
+    <!-- SUMMARY CARDS -->
+    <section class="summary">
+      <div class="summary-card total">
+        <h4>ทั้งหมด</h4>
+        <p id="totalCount">0 ชิ้น</p>
+      </div>
+
+      <div class="summary-card ready">
+        <h4>พร้อมใช้งาน</h4>
+        <p id="readyCount">0 ชิ้น</p>
+      </div>
+
+      <div class="summary-card rented">
+        <h4>ถูกเช่า</h4>
+        <p id="rentedCount">0 ชิ้น</p>
+      </div>
+
+      <div class="summary-card repair">
+        <h4>ชำรุด</h4>
+        <p id="repairCount">0 ชิ้น</p>
+      </div>
+
+      <div class="summary-card lost">
+        <h4>สูญหาย</h4>
+        <p id="lostCount">0 ชิ้น</p>
+      </div>
+    </section>
+
+    <!-- SEARCH -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="ค้นหาอุปกรณ์...">
+    </div>
+
+    <!-- GRID -->
+    <div class="grid" id="equipmentGrid">
+      <p>กำลังโหลดข้อมูล...</p>
+    </div>
+  </div>
+
+  <script src="index.js"></script>
+
+</body>
+
+</html>
