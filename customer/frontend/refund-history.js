@@ -9,6 +9,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+fetch("/sports_rental_system/customer/api/get_profile.php")
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+    var pointEl = document.getElementById("topPoints");
+    if (pointEl && data.points !== undefined) {
+        pointEl.textContent =
+            "\u2B50 ".concat(data.points, " \u0E04\u0E30\u0E41\u0E19\u0E19");
+    }
+});
 function loadRefundHistory() {
     fetch("/sports_rental_system/customer/api/get_customer_refund_history.php", {
         credentials: "include"

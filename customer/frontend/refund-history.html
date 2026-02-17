@@ -6,37 +6,42 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/refund-history.css">
-
 </head>
+
 <body>
 
+<header class="main-header">
+
+    <div class="header-top">
+        <div class="brand">
+            <span class="brand-name">ระบบจองอุปกรณ์กีฬา</span>
+            <small>Sports Equipment Booking System</small>
+        </div>
+
+        <div class="user-zone">
+            <div class="badge orange" id="topPoints">⭐ - คะแนน</div>
+            <a class="badge purple" href="coupon.html">🎟 คูปอง</a>
+            <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+        </div>
+    </div>
+
+    <div class="header-bottom">
+        <nav class="main-nav">
+            <a href="index.html" class="nav-item">เลือกอุปกรณ์</a>
+            <a href="my-bookings.html" class="nav-item">รายการจอง</a>
+            <a href="history.html" class="nav-item">ประวัติการเช่า</a>
+            <a href="refund-history.html" class="nav-item active">ประวัติการยกเลิก</a>
+            <a href="history_point.html" class="nav-item">ประวัติการใช้แต้ม</a>
+            <a href="status_maintenance.html" class="nav-item">สถานะการซ่อม</a>
+        </nav>
+    </div>
+
+</header>
+
+
+<!-- ===== PAGE CONTENT ===== -->
+
 <div class="container">
-
-      <header class="main-header">
-        <div class="header-top">
-            <div class="brand">
-                <span class="brand-name">ระบบจองอุปกรณ์กีฬา</span>
-                <small>Sports Equipment Booking System</small>
-            </div>
-
-            <div class="user-zone">
-                <div class="badge orange" id="topPoints">⭐ - คะแนน</div>
-                <a class="badge purple" href="coupon.html">🎟 คูปอง</a>
-                <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
-            </div>
-
-        </div>
-
-        <div class="header-bottom">
-            <nav class="main-nav">
-                <a href="index.html" class="nav-item">เลือกอุปกรณ์</a>
-                <a href="my-bookings.html" class="nav-item active">รายการจอง</a>
-                <a href="history.html" class="nav-item">ประวัติการเช่า</a>
-                <a href="history_point.html" class="nav-item">ประวัติการใช้แต้ม</a>
-                <a href="status_maintenance.html" class="nav-item">สถานะการซ่อม</a>
-            </nav>
-        </div>
-    </header>
 
     <h2 class="page-title">ประวัติการยกเลิกและคืนเงิน</h2>
 
@@ -62,7 +67,9 @@
 
 </div>
 
+
 <!-- ===== SLIP MODAL ===== -->
+
 <div id="slipModal" class="modal hidden">
     <div class="modal-content">
         <button id="closeModal" class="close-btn">✕</button>

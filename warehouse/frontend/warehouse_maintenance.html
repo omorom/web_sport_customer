@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>จัดการงานซ่อม (Warehouse)</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/warehouse_maintenance.css">
+</head>
+
+<body>
+
+<header class="main-header">
+
+  <div class="header-top">
+    <div class="brand">
+      <span class="brand-name">ระบบจัดการคลังอุปกรณ์กีฬา</span>
+      <small>Sports Equipment Management System</small>
+    </div>
+
+    <div class="staff-zone">
+      <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+    </div>
+  </div>
+
+  <div class="header-bottom">
+    <nav class="main-nav">
+      <a href="index.html" class="nav-item">คลังอุปกรณ์</a>
+      <a href="management.html" class="nav-item">จัดการอุปกรณ์</a>
+      <a href="warehouse_maintenance.html" class="nav-item active">จัดการงานซ่อมบำรุง</a>
+    </nav>
+  </div>
+
+  <div class="booking-bar">
+    <div class="booking-inner">
+      <div class="branch-display">
+        📍 สาขา: <strong id="selectedBranch">กำลังโหลด...</strong>
+      </div>
+    </div>
+  </div>
+
+</header>
+
+<div class="container">
+
+  <h2 class="page-title">จัดการงานซ่อม (Warehouse)</h2>
+
+  <div class="list-layout">
+
+    <!-- ================= FILTER LEFT ================= -->
+    <div class="filter-box">
+
+      <div class="filter-group">
+        <input type="text" id="searchInput" placeholder="ค้นหารหัสอุปกรณ์">
+      </div>
+
+      <div class="filter-group">
+        <select id="statusFilter">
+          <option value="">-- ทุกสถานะ --</option>
+          <option value="1">รอดำเนินการ</option>
+          <option value="2">กำลังดำเนินการ</option>
+          <option value="3">ดำเนินการเสร็จสิ้น</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <select id="damageFilter">
+          <option value="">-- ทุกระดับความเสียหาย --</option>
+          <option value="เล็กน้อย">เล็กน้อย</option>
+          <option value="ปานกลาง">ปานกลาง</option>
+          <option value="รุนแรง">รุนแรง</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <button id="resetFilters" class="btn-reset">
+          รีเซ็ตตัวกรอง
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ================= TABLE RIGHT ================= -->
+    <div class="table-box">
+
+      <table class="maintenance-table">
+        <thead>
+          <tr>
+            <th>รหัสอุปกรณ์</th>
+            <th>รายละเอียด</th>
+            <th>วันที่แจ้ง</th>
+            <th>ระดับความเสียหาย</th>
+            <th>สถานะ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="warehouseList"></tbody>
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="warehouse_maintenance.js"></script>
+</body>
+</html>

@@ -21,24 +21,38 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+fetch("/sports_rental_system/customer/api/get_profile.php")
+    .then(res => res.json())
+    .then(data => {
+
+        const pointEl =
+            document.getElementById("topPoints");
+
+        if (pointEl && data.points !== undefined) {
+            pointEl.textContent =
+                `⭐ ${data.points} คะแนน`;
+        }
+
+    });
+
 function loadRefundHistory() {
 
     fetch("/sports_rental_system/customer/api/get_customer_refund_history.php", {
         credentials: "include"
     })
-    .then(r => r.json())
-    .then(res => {
+        .then(r => r.json())
+        .then(res => {
 
-        if (!res.success) {
-            renderEmpty("ไม่พบข้อมูล");
-            return;
-        }
+            if (!res.success) {
+                renderEmpty("ไม่พบข้อมูล");
+                return;
+            }
 
-        renderTable(res.data);
-    })
-    .catch(() => {
-        renderEmpty("โหลดข้อมูลไม่สำเร็จ");
-    });
+            renderTable(res.data);
+        })
+        .catch(() => {
+            renderEmpty("โหลดข้อมูลไม่สำเร็จ");
+        });
 }
 
 function renderTable(list: RefundItem[]) {
