@@ -81,6 +81,8 @@ try {
 
     $bookingCode = generateBookingCode($conn);
 
+    
+
     /* ===============================
        DATETIME
     ================================ */
@@ -108,7 +110,7 @@ try {
     /* ===============================
        INSERT BOOKINGS
     ================================ */
-    $bookingTypeId   = 1;
+    $bookingTypeId   = 2;
     $bookingStatusId = 1;
     $paymentStatusId = 1;
 

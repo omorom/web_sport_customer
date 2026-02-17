@@ -1,0 +1,197 @@
+/* ================= BASE ================= */
+
+* {
+    box-sizing: border-box;
+    font-family: "Noto Sans Thai", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f5f7fa;
+}
+
+/* ================= WRAPPER ================= */
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+/* ================= CARD ================= */
+
+.card {
+    width: 100%;
+    max-width: 720px;
+
+    background: white;
+    border-radius: 28px;
+    padding: 48px;
+
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
+}
+
+/* ================= TITLE ================= */
+
+h2 {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #111827;
+}
+
+/* ================= BOOKING CODE ================= */
+
+.booking-highlight {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.booking-highlight span {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.booking-code {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 12px 24px;
+
+    background: #fff3e6;
+    color: #ff7a00;
+
+    font-weight: 700;
+    font-size: 22px;
+
+    border-radius: 999px;
+}
+
+/* ================= INFO BOX ================= */
+
+.info-box {
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 22px;
+    padding: 28px;
+    margin-bottom: 32px;
+}
+
+.info-box h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.info-box h4 {
+    margin-top: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.info-box p {
+    font-size: 14px;
+    margin: 6px 0;
+    color: #374151;
+}
+
+.reason-box {
+    margin-top: 6px;
+    margin-bottom: 12px;
+    padding: 12px;
+    border-radius: 14px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* ================= FORM ================= */
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+input[type="number"],
+input[type="file"] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    background: #fafafa;
+    font-size: 14px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #ff7a00;
+    background: white;
+}
+
+/* ================= IMAGE PREVIEW ================= */
+
+.preview-wrapper {
+    text-align: center;
+    margin-top: 14px;
+}
+
+.preview-wrapper img {
+    max-width: 260px;
+    border-radius: 18px;
+    border: 1px solid #e5e7eb;
+    margin-top: 10px;
+}
+
+/* ================= BUTTON ================= */
+
+.btn-danger {
+    width: 100%;
+    padding: 14px 0;
+
+    background: #dc2626;
+    color: white;
+
+    border: none;
+    border-radius: 999px;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.btn-danger:active {
+    background: #991b1b;
+}
+
+.btn-danger:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 600px) {
+
+    .card {
+        padding: 32px 24px;
+    }
+
+    .booking-code {
+        font-size: 18px;
+    }
+}

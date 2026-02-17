@@ -1,0 +1,219 @@
+/* ================= RESET ================= */
+
+* {
+    box-sizing: border-box;
+    font-family: "Noto Sans Thai", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f5f7fa;
+}
+
+/* ================= HEADER ================= */
+
+.main-header {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header-top {
+    max-width: 1400px;
+    margin: auto;
+    padding: 14px 26px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-name {
+    color: #ff7a00;
+    font-weight: 700;
+    font-size: 17px;
+}
+
+.brand small {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.profile-btn {
+    background: #f3f4f6;
+    padding: 6px 14px;
+    border-radius: 999px;
+    text-decoration: none;
+    color: #111827;
+    font-size: 13px;
+}
+
+/* ================= NAV ================= */
+
+.header-bottom {
+    border-top: 1px solid #f0f0f0;
+}
+
+.main-nav {
+    max-width: 1400px;
+    margin: auto;
+    padding: 0 26px;
+    display: flex;
+    gap: 36px;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #374151;
+    padding: 13px 0;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+}
+
+.nav-item.active {
+    color: #ff7a00;
+    border-bottom: 2px solid #ff7a00;
+    font-weight: 600;
+}
+
+/* ================= CONTAINER ================= */
+
+.container {
+    max-width: 1400px;
+    margin: auto;
+    padding: 30px 26px;
+}
+
+/* ================= LIST LAYOUT ================= */
+
+.list-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 28px;
+  margin-top: 20px;
+}
+
+/* ================= FILTER LEFT ================= */
+
+.filter-box {
+  background: #ffffff;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: fit-content;
+}
+
+.filter-group input,
+.filter-group select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  border-color: #ff7a00;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,122,0,0.08);
+}
+
+/* Reset Button */
+
+.btn-reset {
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #ff7a00;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-reset:hover {
+  background: #e66900;
+  transform: translateY(-1px);
+}
+
+/* ================= TABLE RIGHT ================= */
+
+.list-content {
+  background: #ffffff;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+}
+
+/* ================= HISTORY TABLE ================= */
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table thead {
+  background: #f9fafb;
+}
+
+.history-table th {
+  padding: 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.history-table td {
+  padding: 16px;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.history-table tr {
+  transition: 0.2s;
+}
+
+.history-table tr:hover {
+  background: #fff7ed;
+}
+
+/* ================= BADGES ================= */
+
+.badge {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* คืนอุปกรณ์สำเร็จ */
+
+.badge.complete {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* คืนเงินสำเร็จ */
+
+.badge.refunded {
+  background: #ffd6d6;
+  color: #b91c1c;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 900px) {
+  .list-layout {
+    grid-template-columns: 1fr;
+  }
+}

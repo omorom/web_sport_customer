@@ -6,6 +6,15 @@ header("Content-Type: application/json; charset=utf-8");
 ini_set('display_errors', 0);
 
 $cid = $_SESSION["customer_id"] ?? null;
+$branchId   = $_SESSION["branch_id"] ?? null;
+
+if (!$branchId) {
+    echo json_encode([
+        "success" => false,
+        "message" => "No branch selected"
+    ]);
+    exit;
+}
 
 if (!$cid) {
     echo json_encode(["success" => false, "message" => "no session"]);
@@ -16,7 +25,8 @@ if (!$conn) {
     echo json_encode(["success" => false, "message" => "db connection failed"]);
 }
 
-$sql = "SELECT 
+$sql = "
+        SELECT 
             b.booking_id,
             b.pickup_time,
             b.due_return_time,
@@ -47,12 +57,15 @@ $sql = "SELECT
         LEFT JOIN equipment_instances ei ON d.equipment_instance_id = ei.instance_code
         LEFT JOIN booking_status bs ON b.booking_status_id = bs.id
         LEFT JOIN payment_status ps ON b.payment_status_id = ps.id
-        LEFT JOIN review r ON b.booking_id = r.booking_id AND d.detail_id = r.detail_id
+        LEFT JOIN review r ON b.booking_id = r.booking_id 
+                            AND d.detail_id = r.detail_id
         WHERE b.customer_id = ?
-        ORDER BY b.booking_id DESC";
+        AND b.branch_id = ?
+        ORDER BY b.booking_id DESC
+    ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $cid);
+$stmt->bind_param("ss", $cid, $branchId);
 
 if (!$stmt->execute()) {
     echo json_encode(["success" => false, "message" => "เกิดข้อผิดพลาดในการดึงข้อมูล"]);

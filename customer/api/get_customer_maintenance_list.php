@@ -7,6 +7,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
 
+    // ================== AUTH ==================
     if (!isset($_SESSION["customer_id"])) {
         echo json_encode([
             "success" => false,
@@ -16,11 +17,22 @@ try {
     }
 
     $customerId = $_SESSION["customer_id"];
+    $branchId   = $_SESSION["branch_id"] ?? null;
 
+    if (!$branchId) {
+        echo json_encode([
+            "success" => false,
+            "message" => "No branch selected"
+        ]);
+        exit;
+    }
+
+    // ================== FILTERS ==================
     $search   = $_GET["q"] ?? null;
     $statusId = $_GET["status_id"] ?? null;
     $damageId = $_GET["damage_id"] ?? null;
 
+    // ================== BASE QUERY ==================
     $sql = "
         SELECT 
             m.log_id,
@@ -35,26 +47,32 @@ try {
         LEFT JOIN maintenance_status s 
             ON m.status_id = s.status_id
         WHERE m.reported_by_customer_id = ?
+        AND m.branch_id = ?
     ";
 
-    $params = [$customerId];
-    $types  = "s";
+    // customer_id = int
+    // branch_id   = string (เช่น B003)
+    $params = [$customerId, $branchId];
+    $types  = "ss";
 
-    if ($statusId) {
+    // ================== STATUS FILTER ==================
+    if (!empty($statusId)) {
         $sql .= " AND m.status_id = ?";
         $params[] = (int)$statusId;
         $types .= "i";
     }
 
-    if ($damageId) {
+    // ================== DAMAGE FILTER ==================
+    if (!empty($damageId)) {
         $sql .= " AND m.damage_id = ?";
         $params[] = (int)$damageId;
         $types .= "i";
     }
 
-    if ($search) {
+    // ================== SEARCH FILTER ==================
+    if (!empty($search)) {
         $sql .= " AND (m.instance_code LIKE ? OR m.description LIKE ?)";
-        $searchParam = "%$search%";
+        $searchParam = "%{$search}%";
         $params[] = $searchParam;
         $params[] = $searchParam;
         $types .= "ss";
@@ -62,6 +80,7 @@ try {
 
     $sql .= " ORDER BY m.report_date DESC";
 
+    // ================== EXECUTE ==================
     $stmt = $conn->prepare($sql);
     $stmt->bind_param($types, ...$params);
     $stmt->execute();

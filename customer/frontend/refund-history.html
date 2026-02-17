@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ประวัติการยกเลิก</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/refund-history.css">
+
+</head>
+<body>
+
+<div class="container">
+
+      <header class="main-header">
+        <div class="header-top">
+            <div class="brand">
+                <span class="brand-name">ระบบจองอุปกรณ์กีฬา</span>
+                <small>Sports Equipment Booking System</small>
+            </div>
+
+            <div class="user-zone">
+                <div class="badge orange" id="topPoints">⭐ - คะแนน</div>
+                <a class="badge purple" href="coupon.html">🎟 คูปอง</a>
+                <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+            </div>
+
+        </div>
+
+        <div class="header-bottom">
+            <nav class="main-nav">
+                <a href="index.html" class="nav-item">เลือกอุปกรณ์</a>
+                <a href="my-bookings.html" class="nav-item active">รายการจอง</a>
+                <a href="history.html" class="nav-item">ประวัติการเช่า</a>
+                <a href="history_point.html" class="nav-item">ประวัติการใช้แต้ม</a>
+                <a href="status_maintenance.html" class="nav-item">สถานะการซ่อม</a>
+            </nav>
+        </div>
+    </header>
+
+    <h2 class="page-title">ประวัติการยกเลิกและคืนเงิน</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>รหัสการจอง</th>
+                    <th>วันที่ยกเลิก</th>
+                    <th>จำนวนเงินคืน</th>
+                    <th>วันที่คืนเงิน</th>
+                    <th>สถานะ</th>
+                    <th>สลิป</th>
+                </tr>
+            </thead>
+            <tbody id="refundTable">
+                <tr>
+                    <td colspan="6" class="loading">กำลังโหลด...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- ===== SLIP MODAL ===== -->
+<div id="slipModal" class="modal hidden">
+    <div class="modal-content">
+        <button id="closeModal" class="close-btn">✕</button>
+        <img id="modalImage" src="" alt="slip">
+    </div>
+</div>
+
+<script src="refund-history.js"></script>
+
+</body>
+</html>

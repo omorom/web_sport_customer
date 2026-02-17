@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     "ยืนยันการชำระเงิน";
                 return;
             }
-            alert("✅ ส่งสลิปเรียบร้อย รอตรวจสอบ");
+            alert("ส่งสลิปเรียบร้อย รอตรวจสอบ");
             window.location.href = "my-bookings.html";
         })
             .catch(function (err) {

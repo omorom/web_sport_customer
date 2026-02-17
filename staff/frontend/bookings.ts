@@ -6,6 +6,7 @@ interface Booking {
     due_return_time: string;
     net_amount: number;
     status_code: string;
+    payment_status_code: string; // 👈 ใช้กรอง refund
     customer_name: string;
 }
 
@@ -16,8 +17,6 @@ const bookingList =
 
 const tabs =
     document.querySelectorAll(".status-tab") as NodeListOf<HTMLButtonElement>;
-
-    
 
 /* ================= STATE ================= */
 
@@ -69,6 +68,13 @@ function updateCounts(): void {
     const counts: any = {};
 
     allBookings.forEach(b => {
+
+        // 🔥 ถ้าเป็น CANCELLED แต่ REFUNDED แล้ว → ไม่นับ
+        if (b.status_code === "CANCELLED" &&
+            b.payment_status_code === "REFUNDED") {
+            return;
+        }
+
         counts[b.status_code] =
             (counts[b.status_code] || 0) + 1;
     });
@@ -91,10 +97,16 @@ function renderList(status: string): void {
 
     currentStatus = status;
 
-    const list =
-        allBookings.filter(
-            b => b.status_code === status
+    let list = allBookings.filter(
+        b => b.status_code === status
+    );
+
+    // 🔥 ถ้าเป็นแท็บคำขอยกเลิก ให้ตัด REFUNDED ออก
+    if (status === "CANCELLED") {
+        list = list.filter(
+            b => b.payment_status_code !== "REFUNDED"
         );
+    }
 
     if (list.length === 0) {
         bookingList.innerHTML =
@@ -190,7 +202,6 @@ function renderList(status: string): void {
 
 function bindActionButtons(): void {
 
-    // APPROVE
     document.querySelectorAll(".btn-approve")
         .forEach(btn => {
 
@@ -207,7 +218,6 @@ function bindActionButtons(): void {
             });
         });
 
-    // CANCEL
     document.querySelectorAll(".btn-cancel")
         .forEach(btn => {
 
@@ -223,7 +233,6 @@ function bindActionButtons(): void {
             });
         });
 
-    // REFUND
     document.querySelectorAll(".btn-refund")
         .forEach(btn => {
 
@@ -234,9 +243,8 @@ function bindActionButtons(): void {
 
                 if (!id) return;
 
-                if (!confirm("ยืนยันการคืนเงินใช่หรือไม่?")) return;
-
-                confirmRefund(id);
+                window.location.href =
+                    `refund-payment.html?code=${id}`;
             });
         });
 }
@@ -261,34 +269,6 @@ function approveBooking(id: string): void {
                 return;
             }
 
-            fetchBookings();
-        })
-        .catch(() => alert("เชื่อมต่อไม่ได้"));
-}
-
-/* ================= REFUND ================= */
-
-function confirmRefund(id: string): void {
-
-    fetch("/sports_rental_system/staff/api/confirm_cancel_refund.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify({
-            booking_code: id
-        })
-    })
-        .then(r => r.json())
-        .then(res => {
-
-            if (!res.success) {
-                alert(res.message || "คืนเงินไม่สำเร็จ");
-                return;
-            }
-
-            alert("คืนเงินสำเร็จ");
             fetchBookings();
         })
         .catch(() => alert("เชื่อมต่อไม่ได้"));
@@ -361,14 +341,12 @@ const cancelModalConfirm =
     document.getElementById("cancelModalConfirm") as HTMLButtonElement;
 
 function openCancelModal(): void {
-
     cancelReasonInput.value = "";
     cancelModal.classList.remove("hidden");
     cancelReasonInput.focus();
 }
 
 function closeCancelModal(): void {
-
     cancelModal.classList.add("hidden");
     pendingCancelId = null;
 }

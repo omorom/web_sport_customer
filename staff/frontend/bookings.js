@@ -38,6 +38,11 @@ function fetchBookings() {
 function updateCounts() {
     var counts = {};
     allBookings.forEach(function (b) {
+        // 🔥 ถ้าเป็น CANCELLED แต่ REFUNDED แล้ว → ไม่นับ
+        if (b.status_code === "CANCELLED" &&
+            b.payment_status_code === "REFUNDED") {
+            return;
+        }
         counts[b.status_code] =
             (counts[b.status_code] || 0) + 1;
     });
@@ -53,6 +58,10 @@ function updateCounts() {
 function renderList(status) {
     currentStatus = status;
     var list = allBookings.filter(function (b) { return b.status_code === status; });
+    // 🔥 ถ้าเป็นแท็บคำขอยกเลิก ให้ตัด REFUNDED ออก
+    if (status === "CANCELLED") {
+        list = list.filter(function (b) { return b.payment_status_code !== "REFUNDED"; });
+    }
     if (list.length === 0) {
         bookingList.innerHTML =
             "<p class=\"empty\">\u0E44\u0E21\u0E48\u0E21\u0E35\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23</p>";
@@ -77,7 +86,6 @@ function renderList(status) {
 }
 /* ================= ACTION BUTTONS ================= */
 function bindActionButtons() {
-    // APPROVE
     document.querySelectorAll(".btn-approve")
         .forEach(function (btn) {
         btn.addEventListener("click", function () {
@@ -89,7 +97,6 @@ function bindActionButtons() {
             approveBooking(id);
         });
     });
-    // CANCEL
     document.querySelectorAll(".btn-cancel")
         .forEach(function (btn) {
         btn.addEventListener("click", function () {
@@ -100,16 +107,14 @@ function bindActionButtons() {
             openCancelModal();
         });
     });
-    // REFUND
     document.querySelectorAll(".btn-refund")
         .forEach(function (btn) {
         btn.addEventListener("click", function () {
             var id = btn.dataset.id;
             if (!id)
                 return;
-            if (!confirm("ยืนยันการคืนเงินใช่หรือไม่?"))
-                return;
-            confirmRefund(id);
+            window.location.href =
+                "refund-payment.html?code=".concat(id);
         });
     });
 }
@@ -129,29 +134,6 @@ function approveBooking(id) {
             alert(res.message || "อนุมัติไม่สำเร็จ");
             return;
         }
-        fetchBookings();
-    })
-        .catch(function () { return alert("เชื่อมต่อไม่ได้"); });
-}
-/* ================= REFUND ================= */
-function confirmRefund(id) {
-    fetch("/sports_rental_system/staff/api/confirm_cancel_refund.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify({
-            booking_code: id
-        })
-    })
-        .then(function (r) { return r.json(); })
-        .then(function (res) {
-        if (!res.success) {
-            alert(res.message || "คืนเงินไม่สำเร็จ");
-            return;
-        }
-        alert("คืนเงินสำเร็จ");
         fetchBookings();
     })
         .catch(function () { return alert("เชื่อมต่อไม่ได้"); });

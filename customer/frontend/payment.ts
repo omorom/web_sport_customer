@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                alert("✅ ส่งสลิปเรียบร้อย รอตรวจสอบ");
+                alert("ส่งสลิปเรียบร้อย รอตรวจสอบ");
 
                 window.location.href = "my-bookings.html";
 

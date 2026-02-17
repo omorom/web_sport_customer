@@ -66,10 +66,9 @@ fetch("/sports_rental_system/customer/api/get_profile.php")
 function renderHistory(items) {
     var list = document.getElementById("historyList");
     list.innerHTML = "";
-    // กรองเฉพาะรายการที่เสร็จสิ้นหรือยกเลิก
+    // กรองเฉพาะรายการที่เสร็จสิ้น
     var completedItems = items.filter(function (b) {
-        return b.status_code === "COMPLETED" ||
-            b.status_code === "CANCELLED";
+        return b.status_code === "COMPLETED";
     });
     if (completedItems.length === 0) {
         list.innerHTML = "\n            <p style=\"text-align:center; color: gray; padding: 20px;\">\n                \u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E21\u0E35\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23\u0E17\u0E35\u0E48\u0E40\u0E2A\u0E23\u0E47\u0E08\u0E2A\u0E34\u0E49\u0E19\u0E2B\u0E23\u0E37\u0E2D\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01\n            </p>\n        ";
@@ -81,18 +80,30 @@ function renderHistory(items) {
         var hours = getHours(b.pickup_time, b.due_return_time);
         // กำหนด class และ text สำหรับสถานะการชำระเงิน (เหมือนเดิม)
         var paymentInfo = getPaymentStatusUI(b.payment_status_code);
-        div.innerHTML = "\n            <div class=\"history-left\">\n                <img \n                    src=\"".concat(b.display_image, "\" \n                    alt=\"").concat(b.display_name, "\"\n                    class=\"history-img\"\n                >\n                <div class=\"history-info\">      \n                    <div><strong>\u0E23\u0E2B\u0E31\u0E2A\u0E01\u0E32\u0E23\u0E08\u0E2D\u0E07:</strong> ").concat(b.booking_id, "</div>\n                    <div>\n                        <strong>").concat(b.item_type === 'Venue' ? 'สนาม' : 'อุปกรณ์', ":</strong> \n                        ").concat(b.display_name, " \n                        ").concat(b.instance_code ? "(".concat(b.instance_code, ")") : "", "\n                    </div>\n                    <div><strong>\u0E08\u0E33\u0E19\u0E27\u0E19:</strong> ").concat(b.quantity, " ").concat(b.item_type === 'Venue' ? 'สนาม' : 'ชิ้น', " | <strong>\u0E40\u0E27\u0E25\u0E32:</strong> ").concat(hours, " \u0E0A\u0E21.</div>\n                    <div><strong>\u0E22\u0E2D\u0E14\u0E0A\u0E33\u0E23\u0E30:</strong> ").concat(b.net_amount, " \u0E1A\u0E32\u0E17</div>\n                    <div><strong>\u0E2A\u0E16\u0E32\u0E19\u0E30:</strong> ").concat(b.status_name, "</div>\n                    <div>\n                        <strong>\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E01\u0E32\u0E23\u0E0A\u0E33\u0E23\u0E30\u0E40\u0E07\u0E34\u0E19:</strong>\n                        <span class=\"payment-status ").concat(paymentInfo.class, "\">\n                            ").concat(paymentInfo.text, "\n                        </span>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"history-right\">\n                ").concat(!(b.status_code === "COMPLETED" || b.status_code === "CANCELLED")
+        div.innerHTML = "\n            <div class=\"history-left\">\n                <img \n                    src=\"".concat(b.display_image, "\" \n                    alt=\"").concat(b.display_name, "\"\n                    class=\"history-img\"\n                >\n                <div class=\"history-info\">      \n                    <div><strong>\u0E23\u0E2B\u0E31\u0E2A\u0E01\u0E32\u0E23\u0E08\u0E2D\u0E07:</strong> ").concat(b.booking_id, "</div>\n                    <div>\n                        <strong>").concat(b.item_type === 'Venue' ? 'สนาม' : 'อุปกรณ์', ":</strong> \n                        ").concat(b.display_name, " \n                        ").concat(b.instance_code ? "(".concat(b.instance_code, ")") : "", "\n                    </div>\n                    <div><strong>\u0E08\u0E33\u0E19\u0E27\u0E19:</strong> ").concat(b.quantity, " ").concat(b.item_type === 'Venue' ? 'สนาม' : 'ชิ้น', " | <strong>\u0E40\u0E27\u0E25\u0E32:</strong> ").concat(hours, " \u0E0A\u0E21.</div>\n                    <div><strong>\u0E22\u0E2D\u0E14\u0E0A\u0E33\u0E23\u0E30:</strong> ").concat(b.net_amount, " \u0E1A\u0E32\u0E17</div>\n                    <div><strong>\u0E2A\u0E16\u0E32\u0E19\u0E30:</strong> ").concat(b.status_name, "</div>\n                    <div>\n                        <strong>\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E01\u0E32\u0E23\u0E0A\u0E33\u0E23\u0E30\u0E40\u0E07\u0E34\u0E19:</strong>\n                        <span class=\"payment-status ").concat(paymentInfo.class, "\">\n                            ").concat(paymentInfo.text, "\n                        </span>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"history-right\">\n    ").concat(b.status_code !== "COMPLETED"
             ? "<p style=\"color: gray;\">\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E23\u0E35\u0E27\u0E34\u0E27\u0E44\u0E14\u0E49</p>"
-            : b.is_reviewed ?
-                "\n                        <div class=\"review-display\">\n                            <div class=\"review-text\">".concat(b.review_text || "", "</div>\n                            <p style=\"color: green; margin-top:5px;\">\u2714 \u0E23\u0E35\u0E27\u0E34\u0E27\u0E41\u0E25\u0E49\u0E27</p>\n                        </div>\n                    ")
-                :
-                    "\n                    <div class=\"star-rating\">\n                        <span class=\"star\" data-value=\"1\">&#9733;</span>\n                        <span class=\"star\" data-value=\"2\">&#9733;</span>\n                        <span class=\"star\" data-value=\"3\">&#9733;</span>\n                        <span class=\"star\" data-value=\"4\">&#9733;</span>\n                        <span class=\"star\" data-value=\"5\">&#9733;</span>\n                    </div>\n                    <input type=\"hidden\" class=\"rating-value\" value=\"5\">\n                    <textarea placeholder=\"\u0E40\u0E02\u0E35\u0E22\u0E19\u0E23\u0E35\u0E27\u0E34\u0E27\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13...\" class=\"review-box\"></textarea>\n                    <button class=\"review-btn\">\u0E2A\u0E48\u0E07\u0E23\u0E35\u0E27\u0E34\u0E27</button>\n                ", "\n            </div>\n        ");
+            : b.is_reviewed
+                ? "\n                <div class=\"review-display\">\n                    <div class=\"review-stars\">\n                        ".concat(renderStars(b.rating), "\n                    </div>\n                    <div class=\"review-text\">").concat(b.review_text || "", "</div>\n                    <p style=\"color: green; margin-top:5px;\">\u2714 \u0E23\u0E35\u0E27\u0E34\u0E27\u0E41\u0E25\u0E49\u0E27</p>\n                </div>\n\n            ")
+                : "\n                <div class=\"star-rating\">\n                    <span class=\"star\" data-value=\"1\">&#9733;</span>\n                    <span class=\"star\" data-value=\"2\">&#9733;</span>\n                    <span class=\"star\" data-value=\"3\">&#9733;</span>\n                    <span class=\"star\" data-value=\"4\">&#9733;</span>\n                    <span class=\"star\" data-value=\"5\">&#9733;</span>\n                </div>\n                <input type=\"hidden\" class=\"rating-value\" value=\"5\">\n                <textarea placeholder=\"\u0E40\u0E02\u0E35\u0E22\u0E19\u0E23\u0E35\u0E27\u0E34\u0E27\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13...\" class=\"review-box\"></textarea>\n                <button class=\"review-btn\">\u0E2A\u0E48\u0E07\u0E23\u0E35\u0E27\u0E34\u0E27</button>\n            ", "\n</div>\n        ");
         // จัดการ Event สำหรับการส่งรีวิว (เหมือนเดิมแต่ส่ง b เข้าไปใน submitReview)
-        if ((b.status_code === "COMPLETED" || b.status_code === "CANCELLED") && !b.is_reviewed) {
+        if (b.status_code === "COMPLETED" && !b.is_reviewed) {
             setupReviewEvents(div, b);
         }
         list.appendChild(div);
     });
+}
+function renderStars(rating) {
+    var value = rating || 0;
+    var starsHtml = "";
+    for (var i = 1; i <= 5; i++) {
+        if (i <= value) {
+            starsHtml += "<span class=\"star selected\">&#9733;</span>";
+        }
+        else {
+            starsHtml += "<span class=\"star\">&#9733;</span>";
+        }
+    }
+    return starsHtml;
 }
 // ฟังก์ชันช่วยจัดการสถานะการชำระเงิน
 function getPaymentStatusUI(code) {

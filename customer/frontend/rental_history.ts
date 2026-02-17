@@ -2,7 +2,7 @@ interface BookingItem {
     booking_id: string;
     detail_id: number;
     instance_code: string;
-    venue_id?: string; // เพิ่มฟิลด์นี้เพื่อให้รองรับการจองสนาม
+    venue_id?: string;
     item_type: 'Equipment' | 'Venue';
     display_image: string;
     display_name: string;
@@ -29,21 +29,21 @@ function loadHistory(): void {
     fetch("/sports_rental_system/customer/api/get_booking_history.php", {
         credentials: "include"
     })
-    .then(r => r.json())
-    .then((res: any) => {
-        const loading = document.getElementById("loading")!;
-        const box = document.getElementById("historyBox")!;
+        .then(r => r.json())
+        .then((res: any) => {
+            const loading = document.getElementById("loading")!;
+            const box = document.getElementById("historyBox")!;
 
-        loading.style.display = "none";
+            loading.style.display = "none";
 
-        if (!res.success || !Array.isArray(res.items)) {
-            alert("ไม่พบข้อมูลประวัติการเช่า");
-            return;
-        }
+            if (!res.success || !Array.isArray(res.items)) {
+                alert("ไม่พบข้อมูลประวัติการเช่า");
+                return;
+            }
 
-        box.classList.remove("hidden");
-        renderHistory(res.items);
-    });
+            box.classList.remove("hidden");
+            renderHistory(res.items);
+        });
 }
 
 // ส่วนดึงคะแนน Profile (คงเดิม)
@@ -60,10 +60,9 @@ function renderHistory(items: BookingItem[]): void {
     const list = document.getElementById("historyList")!;
     list.innerHTML = "";
 
-    // กรองเฉพาะรายการที่เสร็จสิ้นหรือยกเลิก
+    // กรองเฉพาะรายการที่เสร็จสิ้น
     const completedItems = items.filter(b =>
-        b.status_code === "COMPLETED" ||
-        b.status_code === "CANCELLED"
+        b.status_code === "COMPLETED"
     );
 
     if (completedItems.length === 0) {
@@ -80,7 +79,7 @@ function renderHistory(items: BookingItem[]): void {
         div.className = "history-item";
 
         const hours = getHours(b.pickup_time, b.due_return_time);
-        
+
         // กำหนด class และ text สำหรับสถานะการชำระเงิน (เหมือนเดิม)
         const paymentInfo = getPaymentStatusUI(b.payment_status_code);
 
@@ -111,40 +110,60 @@ function renderHistory(items: BookingItem[]): void {
             </div>
 
             <div class="history-right">
-                ${!(b.status_code === "COMPLETED" || b.status_code === "CANCELLED")
+    ${b.status_code !== "COMPLETED"
                 ? `<p style="color: gray;">ยังไม่สามารถรีวิวได้</p>`
-                : b.is_reviewed ?
-                    `
-                        <div class="review-display">
-                            <div class="review-text">${b.review_text || ""}</div>
-                            <p style="color: green; margin-top:5px;">✔ รีวิวแล้ว</p>
-                        </div>
-                    `
-                    :
-                    `
-                    <div class="star-rating">
-                        <span class="star" data-value="1">&#9733;</span>
-                        <span class="star" data-value="2">&#9733;</span>
-                        <span class="star" data-value="3">&#9733;</span>
-                        <span class="star" data-value="4">&#9733;</span>
-                        <span class="star" data-value="5">&#9733;</span>
+                : b.is_reviewed
+                    ? `
+                <div class="review-display">
+                    <div class="review-stars">
+                        ${renderStars(b.rating)}
                     </div>
-                    <input type="hidden" class="rating-value" value="5">
-                    <textarea placeholder="เขียนรีวิวของคุณ..." class="review-box"></textarea>
-                    <button class="review-btn">ส่งรีวิว</button>
-                `
+                    <div class="review-text">${b.review_text || ""}</div>
+                    <p style="color: green; margin-top:5px;">✔ รีวิวแล้ว</p>
+                </div>
+
+            `
+                    : `
+                <div class="star-rating">
+                    <span class="star" data-value="1">&#9733;</span>
+                    <span class="star" data-value="2">&#9733;</span>
+                    <span class="star" data-value="3">&#9733;</span>
+                    <span class="star" data-value="4">&#9733;</span>
+                    <span class="star" data-value="5">&#9733;</span>
+                </div>
+                <input type="hidden" class="rating-value" value="5">
+                <textarea placeholder="เขียนรีวิวของคุณ..." class="review-box"></textarea>
+                <button class="review-btn">ส่งรีวิว</button>
+            `
             }
-            </div>
+</div>
         `;
 
         // จัดการ Event สำหรับการส่งรีวิว (เหมือนเดิมแต่ส่ง b เข้าไปใน submitReview)
-        if ((b.status_code === "COMPLETED" || b.status_code === "CANCELLED") && !b.is_reviewed) {
+        if (b.status_code === "COMPLETED" && !b.is_reviewed) {
             setupReviewEvents(div, b);
         }
 
         list.appendChild(div);
     });
 }
+
+function renderStars(rating?: number): string {
+
+    const value = rating || 0;
+    let starsHtml = "";
+
+    for (let i = 1; i <= 5; i++) {
+        if (i <= value) {
+            starsHtml += `<span class="star selected">&#9733;</span>`;
+        } else {
+            starsHtml += `<span class="star">&#9733;</span>`;
+        }
+    }
+
+    return starsHtml;
+}
+
 
 // ฟังก์ชันช่วยจัดการสถานะการชำระเงิน
 function getPaymentStatusUI(code: string) {
@@ -215,21 +234,21 @@ function submitReview(item: BookingItem, textarea: HTMLTextAreaElement, ratingIn
         credentials: "include",
         body: JSON.stringify(payload)
     })
-    .then(async r => {
-        const text = await r.text();
-        try { return JSON.parse(text); } 
-        catch (e) { throw new Error("เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ: " + text.substring(0, 100)); }
-    })
-    .then(res => {
-        if (res.success) {
-            alert("ขอบคุณสำหรับรีวิว!");
-            loadHistory();
-        } else {
-            alert(res.message || "เกิดข้อผิดพลาด");
-        }
-    })
-    .catch(err => {
-        console.error("Fetch Error:", err);
-        alert(err.message || "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
-    });
+        .then(async r => {
+            const text = await r.text();
+            try { return JSON.parse(text); }
+            catch (e) { throw new Error("เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ: " + text.substring(0, 100)); }
+        })
+        .then(res => {
+            if (res.success) {
+                alert("ขอบคุณสำหรับรีวิว!");
+                loadHistory();
+            } else {
+                alert(res.message || "เกิดข้อผิดพลาด");
+            }
+        })
+        .catch(err => {
+            console.error("Fetch Error:", err);
+            alert(err.message || "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+        });
 }

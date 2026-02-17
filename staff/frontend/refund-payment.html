@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>คืนเงินการจอง</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="css/refund.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+
+
+    <div class="card">
+      <h2>ยืนยันการคืนเงิน</h2>
+
+      <!-- รหัสการจอง -->
+      <div class="booking-highlight">
+        <div id="bookingCode" class="booking-code">
+          กำลังโหลด...
+        </div>
+      </div>
+
+      <!--ข้อมูลการยกเลิก -->
+      <div class="info-box">
+
+        <h3>รายละเอียดการยกเลิก</h3>
+
+        <p>
+          <strong>ลูกค้า:</strong>
+          <span id="customerName">กำลังโหลด...</span>
+        </p>
+
+        <p>
+          <strong>ยอดที่ลูกค้าชำระ:</strong>
+          <span id="paidAmount">-</span> บาท
+        </p>
+
+        <p><strong>เหตุผลการยกเลิก:</strong></p>
+        <div class="reason-box" id="cancelReason">
+          -
+        </div>
+        <h4>บัญชีสำหรับคืนเงิน</h4>
+        <p>
+          ธนาคาร:
+          <span id="bankName">-</span>
+        </p>
+        <p>
+          ชื่อบัญชี:
+          <span id="accountName">-</span>
+        </p>
+        <p>
+          เลขบัญชี:
+          <span id="accountNumber">-</span>
+        </p>
+
+      </div>
+
+      <!-- ฟอร์มคืนเงิน -->
+      <div class="form-group">
+        <label>จำนวนเงินคืน (บาท)</label>
+        <input type="number" id="refundAmount" step="0.01" min="0">
+      </div>
+
+      <div class="form-group">
+        <label>แนบสลิปคืนเงิน</label>
+        <input type="file" id="refundSlip" accept="image/*">
+      </div>
+
+      <div class="preview-wrapper">
+        <img id="previewImg" hidden />
+      </div>
+
+      <button id="confirmRefundBtn" class="btn-danger">
+        ยืนยันการคืนเงิน
+      </button>
+
+    </div>
+
+  </div>
+
+  <script src="refund.js"></script>
+
+</body>
+
+</html>

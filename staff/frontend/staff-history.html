@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ประวัติการทำรายการ</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/staff-history.css">
+
+</head>
+
+<body>
+
+  <header class="main-header">
+
+    <div class="header-top">
+
+      <div class="brand">
+        <span class="brand-name">ระบบเช่าอุปกรณ์กีฬา</span>
+        <small>Sports Equipment Rental System</small>
+      </div>
+
+      <div class="user-zone">
+        <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+      </div>
+
+    </div>
+
+    <div class="header-bottom">
+      <nav class="main-nav">
+        <a href="index.html" class="nav-item">เช่าอุปกรณ์</a>
+        <a href="bookings.html" class="nav-item">รายการเช่า</a>
+        <a href="return.html" class="nav-item ">คืนอุปกรณ์</a>
+        <a href="staff-history.html" class="nav-item active">ประวัติการเช่า</a>
+        <a href="equipment_list.html" class="nav-item">อุปกรณ์ทั้งหมด</a>
+        <a href="maintenance.html" class="nav-item">ซ่อมอุปกรณ์</a>
+      </nav>
+    </div>
+
+  </header>
+
+  <div class="container">
+
+    <h2>ประวัติการทำรายการ</h2>
+
+    <div class="list-layout">
+
+      <!-- LEFT FILTER -->
+      <div class="filter-box">
+
+        <h3>ตัวกรอง</h3>
+
+        <div class="filter-group">
+          <label>ค้นหา</label>
+          <input type="text" id="searchInput" placeholder="รหัสการจอง / ชื่อลูกค้า">
+        </div>
+
+        <div class="filter-group">
+          <label>วันที่เริ่มต้น</label>
+          <input type="date" id="startDate">
+        </div>
+
+        <div class="filter-group">
+          <label>วันที่สิ้นสุด</label>
+          <input type="date" id="endDate">
+        </div>
+
+        <div class="filter-group">
+          <label>ประเภท</label>
+          <select id="typeFilter">
+            <option value="ALL">ทั้งหมด</option>
+            <option value="COMPLETE">คืนอุปกรณ์สำเร็จ</option>
+            <option value="REFUNDED">คืนเงินสำเร็จ</option>
+          </select>
+        </div>
+
+        <button id="resetFilterBtn" class="btn-reset">
+          รีเซ็ตตัวกรอง
+        </button>
+
+      </div>
+
+      <!-- RIGHT TABLE -->
+      <div class="list-content">
+
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>รหัสการจอง</th>
+              <th>ลูกค้า</th>
+              <th>วันที่เสร็จสิ้น</th>
+              <th>ยอดเงิน</th>
+              <th>ประเภท</th>
+            </tr>
+          </thead>
+          <tbody id="historyTable">
+            <tr>
+              <td colspan="5" class="empty-row">
+                กำลังโหลด...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="staff-history.js"></script>
+</body>
+
+</html>
