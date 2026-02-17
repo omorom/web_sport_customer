@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>โปรไฟล์</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans Thai", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f6f8;
+            display: flex;
+            justify-content: center;
+            padding: 40px 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        /* ===== Back Link ===== */
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #555;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: #ff7a00;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 18px;
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 22px 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ===== Avatar ===== */
+
+        .avatar {
+            width: 90px;
+            height: 90px;
+            background: #fff3e6;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #ff7a00;
+        }
+
+        .avatar svg {
+            width: 38px;
+            height: 38px;
+            stroke: #333;
+        }
+
+        /* ===== Fields ===== */
+
+        .field {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 4px;
+        }
+
+        .value {
+            font-size: 15px;
+            color: #111;
+        }
+
+        .value.highlight {
+            color: #ff7a00;
+            font-weight: 600;
+        }
+
+        .value.link {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        /* ===== Buttons ===== */
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn {
+            flex: 1;
+            border: none;
+            padding: 13px;
+            font-size: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-main {
+            background: #ff7a00;
+            color: white;
+        }
+
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: .9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>โปรไฟล์เจ้าหน้าที่</h2>
+
+        <div class="card">
+
+            <div class="avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <circle cx="12" cy="8" r="4"></circle>
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+                </svg>
+            </div>
+
+            <!-- NAME -->
+            <div class="field">
+                <div class="label">ชื่อ-นามสกุล</div>
+                <div class="value highlight" id="profileName">-</div>
+            </div>
+
+			<!-- ID -->
+            <div class="field">
+                <div class="label">รหัสเจ้าหน้าที่</div>
+                <div class="value" id="profileId">-</div>
+            </div>
+
+			<div class="field">
+                <div class="label">ตำแหน่งหน้าที่</div>
+                <div class="value role-text" id="profileRole">-</div>
+            </div>
+
+            <!-- EMAIL -->
+            <div class="field">
+                <div class="label">อีเมล</div>
+                <div class="value" id="profileEmail">-</div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="btn-row">
+                <button class="btn btn-main" id="backBtn">
+                    กลับหน้าหลัก
+                </button>
+
+                <button class="btn btn-logout" id="logoutBtn">
+                    ออกจากระบบ
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+
+            try {
+
+                const res = await fetch("/sports_rental_system/staff/api/get_profile.php");
+                const data = await res.json();
+
+                console.log("PROFILE:", data);
+
+                if (!data.success) {
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                document.getElementById("profileName").textContent = data.name;
+                document.getElementById("profileId").textContent = data.staff_id;
+                document.getElementById("profileEmail").textContent = data.email;
+				document.getElementById("profileRole").textContent = data.department;
+
+            } catch (err) {
+                console.error("PROFILE ERROR", err);
+            }
+
+        });
+
+        // buttons
+        document.getElementById("backBtn").onclick = () => {
+            window.history.back();
+        };
+
+        document.getElementById("logoutBtn").onclick = async () => {
+            window.location.href = "login.html";
+
+        };
+    </script>
+
+</body>
+
+</html>

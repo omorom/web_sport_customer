@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Executive Dashboard</title>
+
+	<link rel="stylesheet" href="css/index.css">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+	<header class="main-header">
+
+		<div class="header-top">
+
+			<div class="brand">
+				<span class="brand-name">ระบบเช่าอุปกรณ์กีฬา</span>
+				<small>Sports Equipment Rental System</small>
+			</div>
+
+			<div class="staff-zone">
+				<a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+			</div>
+
+		</div>
+
+		<div class="header-bottom">
+			<nav class="main-nav">
+				<a href="index.html" class="nav-item active">ภาพรวมอุปกรณ์</a>
+			</nav>
+		</div>
+	</header>
+
+	<div class="container">
+
+		<!-- ================= SIDEBAR FILTER ================= -->
+		<aside class="sidebar">
+
+			<h3>ตัวกรองข้อมูล</h3>
+
+			<label>ช่วงเวลา</label>
+			<select id="rangeSelect">
+				<option value="7days">7 วัน</option>
+				<option value="30days" selected>30 วัน</option>
+				<option value="1year">1 ปี</option>
+				<option value="custom">กำหนดเอง</option>
+			</select>
+
+			<div id="customDateBox" class="custom-date">
+				<input type="date" id="startDate">
+				<input type="date" id="endDate">
+			</div>
+
+			<label>ภูมิภาค</label>
+			<select id="regionSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
+
+			<label>จังหวัด</label>
+			<select id="provinceSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
+
+			<label>สาขา</label>
+			<select id="branchSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
+
+			<label>รูปแบบการเช่า</label>
+			<select id="bookingTypeSelect">
+				<option value="">ทั้งหมด</option>
+				<option value="1">ออนไลน์</option>
+				<option value="2">หน้าร้าน</option>
+			</select>
+
+			<button id="resetFilter" class="btn-reset">
+				รีเซ็ตตัวกรอง
+			</button>
+
+		</aside>
+
+		<!-- ================= MAIN ================= -->
+		<main class="main">
+
+			<!-- ================= ROW 1 : KPI ================= -->
+			<section class="kpi-grid">
+				<div class="kpi-card">
+					<div class="kpi-title">การจองทั้งหมด</div>
+					<div class="kpi-value" id="kpiBookings">-</div>
+				</div>
+
+				<div class="kpi-card">
+					<div class="kpi-title">ผู้ใช้งานทั้งหมด</div>
+					<div class="kpi-value" id="kpiUsers">-</div>
+				</div>
+
+				<div class="kpi-card">
+					<div class="kpi-title">รายได้สุทธิ</div>
+					<div class="kpi-value" id="kpiRevenue">-</div>
+				</div>
+
+				<div class="kpi-card">
+					<div class="kpi-title">ค่าใช้จ่ายรวม</div>
+					<div class="kpi-value" id="kpiExpense">-</div>
+				</div>
+			</section>
+
+
+			<!-- ================= ROW 2 : PIE ================= -->
+			<section class="grid-2">
+				<div class="card">
+					<h3>สัดส่วนการชำระเงิน</h3>
+					<canvas id="paymentChart"></canvas>
+				</div>
+
+				<div class="card">
+					<h3>Online vs Walk-in</h3>
+					<canvas id="bookingRatioChart"></canvas>
+				</div>
+			</section>
+
+
+			<!-- ================= ROW 3 : TREND ================= -->
+			<section class="card">
+				<h3>แนวโน้มการจอง & รายได้</h3>
+				<canvas id="trendChart"></canvas>
+			</section>
+
+
+			<!-- ================= ROW 4 : PROFIT + TOP ================= -->
+			<section class="card">
+				<h3>รายได้ vs ค่าใช้จ่าย</h3>
+				<canvas id="profitChart"></canvas>
+			</section>
+
+			<section class="card">
+				<h3>อุปกรณ์ยอดนิยม Top 5</h3>
+				<canvas id="topChart"></canvas>
+			</section>
+
+
+		</main>
+
+
+	</div>
+
+	<script src="index.js"></script>
+
+</body>
+
+</html>

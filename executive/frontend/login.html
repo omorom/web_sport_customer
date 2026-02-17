@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>เข้าสู่ระบบผู้บริหาร</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans Thai", Tahoma, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f6f8;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-card {
+            background: #fff;
+            width: 380px;
+            padding: 30px 28px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            text-align: center;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            background: #ff7a00;
+            border-radius: 16px;
+            margin: 0 auto 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        h2 {
+            margin: 10px 0 22px;
+            color: #ff7a00;
+            font-size: 20px;
+        }
+
+        .sub {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: block;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus {
+            border-color: #ff7a00;
+        }
+
+        .forgot {
+            text-align: right;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .forgot a {
+            color: #ff7a00;
+            text-decoration: none;
+        }
+
+        .forgot a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-login {
+            width: 100%;
+            border: none;
+            background: #ff7a00;
+            color: white;
+            padding: 12px;
+            font-size: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: #e56e00;
+        }
+
+        footer {
+            margin-top: 18px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="logo">📦</div>
+        <h2>ระบบเช่าอุปกรณ์กีฬา</h2>
+        <div class="sub">สำหรับผู้บริหาร</div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>รหัสผู้บริหาร / Email</label>
+                <input id="email" name="email" type="text" placeholder="กรอกอีเมลหรือรหัสผู้บริหาร" required />
+            </div>
+
+            <div class="form-group">
+                <label>รหัสผ่าน</label>
+                <input id="password" name="password" type="password" placeholder="กรอกรหัสผ่าน" required />
+            </div>
+
+            <div class="forgot">
+                <a href="forget_password.html">ลืมรหัสผ่าน?</a>
+            </div>
+
+            <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
+        </form>
+
+        <footer>ระบบสำหรับผู้บริหารเท่านั้น</footer>
+    </div>
+    <script src="login.js"></script>
+</body>
+</html>
