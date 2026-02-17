@@ -109,6 +109,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 return "<span class=\"status-badge status-maintenance\">\u0E1A\u0E33\u0E23\u0E38\u0E07\u0E23\u0E31\u0E01\u0E29\u0E32</span>";
             case "Lost":
                 return "<span class=\"status-badge status-lost\">\u0E2A\u0E39\u0E0D\u0E2B\u0E32\u0E22</span>";
+            case "Expired":
+                return "<span class=\"status-badge status-expired\">\u0E2B\u0E21\u0E14\u0E2D\u0E32\u0E22\u0E38</span>";
             default:
                 return status;
         }

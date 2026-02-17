@@ -164,6 +164,9 @@ document.addEventListener("DOMContentLoaded", () => {
             case "Lost":
                 return `<span class="status-badge status-lost">สูญหาย</span>`;
 
+            case "Expired":
+                return `<span class="status-badge status-expired">หมดอายุ</span>`;
+
             default:
                 return status;
         }

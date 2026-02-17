@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เพิ่มอุปกรณ์</title>
+  <link rel="stylesheet" href="css/add_equipment.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- BACK BUTTON -->
+  <div class="top-bar">
+    <a href="management.html" class="back-btn">
+      ← กลับไปหน้าจัดการอุปกรณ์
+    </a>
+  </div>
+
+  <div class="card">
+
+    <div class="card-header">
+      <h2>เพิ่มอุปกรณ์ใหม่</h2>
+      <p>เลือกหมวดหมู่และอุปกรณ์ จากนั้นกรอกข้อมูลอุปกรณ์ใหม่</p>
+    </div>
+
+    <form id="addForm">
+
+      <div class="form-group">
+        <label>หมวดหมู่</label>
+        <select id="categorySelect" required>
+          <option value="">-- เลือกหมวดหมู่ --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>อุปกรณ์ (รหัส + ชื่อ)</label>
+        <select id="equipmentSelect" required>
+          <option value="">-- เลือกอุปกรณ์ --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>รหัสอุปกรณ์ (Instance Code)</label>
+        <input type="text" id="instanceCode" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>วันที่รับเข้า</label>
+          <input type="date" id="receivedDate" required>
+        </div>
+
+        <div class="form-group">
+          <label>วันหมดอายุ</label>
+          <input type="date" id="expiryDate" required>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">
+        เพิ่มอุปกรณ์
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
+<script src="add_equipment.js"></script>
+</body>
+</html>
