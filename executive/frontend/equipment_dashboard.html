@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Executive Dashboard - อุปกรณ์ & สนาม</title>
+
+  <link rel="stylesheet" href="css/equipment_dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <header class="main-header">
+
+    <div class="header-top">
+      <div class="brand">
+        <span class="brand-name">ระบบเช่าอุปกรณ์กีฬา</span>
+        <small>Sports Equipment Rental System</small>
+      </div>
+
+      <div>
+        <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+      </div>
+    </div>
+
+    <div class="header-bottom">
+      <nav class="main-nav">
+        <a href="index.html" class="nav-item">ภาพรวมอุปกรณ์</a>
+        <a href="user.html" class="nav-item">ผู้ใช้</a>
+        <a href="equipment_dashboard.html" class="nav-item active">สถานะอุปกรณ์</a>
+      </nav>
+    </div>
+
+  </header>
+
+  <div class="container">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+
+      <h3>ตัวกรองข้อมูล</h3>
+
+      <label>ช่วงเวลา</label>
+      <select id="rangeSelect">
+        <option value="7days">7 วัน</option>
+        <option value="30days" selected>30 วัน</option>
+        <option value="1year">1 ปี</option>
+        <option value="custom">กำหนดเอง</option>
+      </select>
+
+      <input type="date" id="startDate">
+      <input type="date" id="endDate">
+
+      <label>ภูมิภาค</label>
+      <select id="regionSelect"></select>
+
+      <label>จังหวัด</label>
+      <select id="provinceSelect"></select>
+
+      <label>สาขา</label>
+      <select id="branchSelect"></select>
+
+      <label>หมวดหมู่</label>
+      <select id="categorySelect"></select>
+
+      <label>ชื่ออุปกรณ์</label>
+      <select id="equipmentSelect"></select>
+
+      <button class="btn-reset" id="resetFilter">รีเซ็ตตัวกรอง</button>
+
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <main class="main">
+
+      <!-- KPI -->
+      <section class="kpi-grid">
+
+        <div class="kpi-card">
+          <div class="kpi-title">อุปกรณ์ทั้งหมด</div>
+          <div class="kpi-value" id="kpiEquipment">-</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">คะแนนเฉลี่ยอุปกรณ์</div>
+          <div class="kpi-value" id="kpiEquipRating">-</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">สนามทั้งหมด</div>
+          <div class="kpi-value" id="kpiVenue">-</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">คะแนนเฉลี่ยสนาม</div>
+          <div class="kpi-value" id="kpiVenueRating">-</div>
+        </div>
+
+      </section>
+
+      <!-- Equipment Rating -->
+      <section class="grid-2">
+        <div class="card">
+          <h3>⭐ Top 5 อุปกรณ์คะแนนดี</h3>
+          <canvas id="bestEquipmentChart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>🔻 Top 5 อุปกรณ์คะแนนแย่</h3>
+          <canvas id="worstEquipmentChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Venue Rating -->
+      <section class="grid-2">
+        <div class="card">
+          <h3>⭐ Top 5 สนามคะแนนดี</h3>
+          <canvas id="bestVenueChart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>🔻 Top 5 สนามคะแนนแย่</h3>
+          <canvas id="worstVenueChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Risk & Category -->
+      <section class="grid-2">
+
+        <div class="card">
+          <h3>⏳ ใกล้หมดอายุ (30 วัน)</h3>
+          <canvas id="expireChart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>🥧 หมวดหมู่ยอดนิยม</h3>
+          <canvas id="categoryChart"></canvas>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="equipment_dashboard.js"></script>
+
+</body>
+
+</html>

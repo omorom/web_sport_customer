@@ -1,0 +1,254 @@
+/* ================= RESET ================= */
+
+* {
+    box-sizing: border-box;
+    font-family: "Noto Sans Thai", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f3f5f9;
+    color: #111827;
+}
+
+/* ================= HEADER ================= */
+
+.main-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header-top {
+    max-width: 1400px;
+    margin: auto;
+    padding: 16px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand-name {
+    color: #ff7a00;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.brand small {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.profile-btn {
+    background: #f3f4f6;
+    padding: 6px 14px;
+    border-radius: 999px;
+    text-decoration: none;
+    color: #111827;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+.profile-btn:hover {
+    background: #e5e7eb;
+}
+
+/* ================= NAV ================= */
+
+.header-bottom {
+    border-top: 1px solid #f0f0f0;
+}
+
+.main-nav {
+    max-width: 1400px;
+    margin: auto;
+    padding: 0 28px;
+    display: flex;
+    gap: 40px;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #4b5563;
+    padding: 14px 0;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+}
+
+.nav-item.active {
+    color: #ff7a00;
+    border-bottom: 2px solid #ff7a00;
+    font-weight: 600;
+}
+
+/* ================= LAYOUT ================= */
+
+.container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    padding: 36px 24px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: fit-content;
+}
+
+.sidebar h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+}
+
+.sidebar label {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 8px;
+}
+
+.sidebar select,
+.sidebar input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 4px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    background: #fafafa;
+    transition: 0.2s ease;
+}
+
+.sidebar select:focus,
+.sidebar input:focus {
+    outline: none;
+    border-color: #ff7a00;
+    box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.15);
+    background: #ffffff;
+}
+
+.btn-reset {
+    margin-top: 16px;
+    padding: 12px;
+    background: #ff7a00;
+    border: none;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.btn-reset:hover {
+    background: #e66c00;
+    transform: translateY(-1px);
+}
+
+/* ================= SECTION TITLE ================= */
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* ================= KPI ================= */
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 18px;
+    box-shadow: 0 8px 25px rgba(17, 24, 39, 0.04);
+    border-top: 4px solid #ff7a00;
+    transition: 0.25s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(17, 24, 39, 0.08);
+}
+
+.kpi-title {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+/* ================= CARD ================= */
+
+.card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
+    transition: 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 45px rgba(17, 24, 39, 0.08);
+}
+
+.card h3 {
+    margin: 0 0 16px;
+    font-size: 16px;
+}
+
+.card canvas {
+    margin-top: 10px;
+    max-height: 260px !important;
+}
+
+/* ================= GRID ================= */
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1000px) {
+
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        order: 2;
+    }
+
+    .main {
+        order: 1;
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}

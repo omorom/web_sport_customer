@@ -1,0 +1,451 @@
+/* ================= RESET ================= */
+
+* {
+  box-sizing: border-box;
+  font-family: "Noto Sans Thai", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f3f5f9;
+  color: #111827;
+}
+
+/* ================= HEADER ================= */
+
+.main-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-top {
+  max-width: 1400px;
+  margin: auto;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-name {
+  color: #ff7a00;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.brand small {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.profile-btn {
+  background: #f3f4f6;
+  padding: 6px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #111827;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.profile-btn:hover {
+  background: #e5e7eb;
+}
+
+/* ================= NAV ================= */
+
+.header-bottom {
+  border-top: 1px solid #f0f0f0;
+}
+
+.main-nav {
+  max-width: 1400px;
+  margin: auto;
+  padding: 0 28px;
+  display: flex;
+  gap: 40px;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #4b5563;
+  padding: 14px 0;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+}
+
+.nav-item.active {
+  color: #ff7a00;
+  border-bottom: 2px solid #ff7a00;
+  font-weight: 600;
+}
+
+/* ================= PAGE LAYOUT ================= */
+
+.container {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 26px;
+
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    column-gap: 24px;
+    row-gap: 18px;
+}
+
+/* ให้ header, summary, search เต็มแถว */
+.page-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.page-header>div {
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.page-header .sub-text {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.page-header .print-btn {
+    margin-left: auto;
+}
+
+.print-btn {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    height: fit-content;
+
+}
+
+.print-btn:hover {
+    background: #e5e7eb;
+}
+
+.summary {
+    grid-column: 2;
+}
+
+.search-bar {
+    grid-column: 2;
+}
+
+.sidebar {
+    grid-column: 1;
+}
+
+.content {
+    grid-column: 2;
+}
+
+/* ================= SUMMARY ================= */
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 0;
+}
+
+.summary-card {
+    background: #ffffff;
+    padding: 22px 24px;
+    border-radius: 18px;
+    border: 1px solid #eef0f3;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 110px;
+}
+
+.summary-card h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.summary-card p {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 8px 0 0 0;
+}
+
+.summary-card.total p {
+    color: #111827;
+}
+
+.summary-card.ready p {
+    color: #16a34a;
+}
+
+.summary-card.rented p {
+    color: #2563eb;
+}
+
+.summary-card.repair p {
+    color: #f59e0b;
+}
+
+.summary-card.lost p {
+    color: #949494;
+}
+
+
+/* ================= SEARCH ================= */
+
+.search-bar {
+    margin: 20px 0;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    grid-column: 1;
+    grid-row: 2 / 5;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    align-self: start;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar h3 {
+    margin-top: 0;
+}
+
+.filter-block {
+    margin-bottom: 18px;
+}
+
+.filter-block label,
+.filter-block h4 {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #555;
+}
+
+.filter-block select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+/* ================= CONTENT ================= */
+
+.content {
+    min-width: 0;
+}
+
+.table-wrapper {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #eee;
+}
+
+.equipment-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.equipment-table th {
+    text-align: left;
+    padding: 14px;
+    background: #f9fafb;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.equipment-table td {
+    padding: 14px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+}
+
+.badge-expired {
+	background-color: #ef4444;
+	color: white;
+}
+
+.badge-lost {
+    background-color: #e5e7eb;
+    color: #374151;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 992px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: relative;
+        top: 0;
+    }
+}
+
+/* ปุ่มรีเซ็ตตัวกรอง */
+.reset-btn {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    background: #ff7a00;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.reset-btn:hover {
+    background: #e66c00;
+}
+
+/* ================= ANALYTICS ================= */
+
+.analytics-row {
+    grid-column: 2;
+    grid-row: 4;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+.analytics-card {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #eef0f3;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 450px;
+}
+
+.analytics-card h3 {
+    font-size: 13px;
+    margin-top: 4px;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.analytics-card .sub-text {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+    margin-bottom: 18px;
+}
+
+.chart-placeholder {
+    height: 320px;
+    background: #f9fafb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+}
+
+#statusByCategoryChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    /* ทำให้เป็นวงรี */
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* ว่าง / พร้อมใช้งาน */
+.badge-ready {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+/* กำลังใช้งาน */
+.badge-rented {
+    background-color: #e0e7ff;
+    color: #1e40af;
+}
+
+/* ชำรุด */
+.badge-damaged {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* สูญหาย */
+.badge-lost {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.rating {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: #fff7ed;
+    color: #f59e0b;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.no-rating {
+    color: #9ca3af;
+}
+
+.exp-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.exp-warning {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.exp-expired {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
