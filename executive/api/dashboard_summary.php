@@ -305,6 +305,72 @@ while ($row = $resRatio->fetch_assoc()) {
 $net_profit = (float)$kpi["total_revenue"] - (float)$expense["total_expense"];
 
 /* ==============================
+   CHANNEL DAILY (Online vs Walk-in)
+============================== */
+
+$sqlChannelDaily = "
+SELECT 
+    DAYOFWEEK(bk.pickup_time) AS day_num,
+    SUM(CASE WHEN bt.name_th = 'ออนไลน์' THEN 1 ELSE 0 END) AS online,
+    SUM(CASE WHEN bt.name_th = 'หน้าร้าน' THEN 1 ELSE 0 END) AS walkin
+FROM bookings bk
+JOIN booking_types bt ON bk.booking_type_id = bt.id
+JOIN branches b ON bk.branch_id = b.branch_id
+JOIN provinces p ON b.province_id = p.province_id
+JOIN region r ON p.region_id = r.region_id
+$whereSQL
+GROUP BY day_num
+ORDER BY FIELD(day_num,2,3,4,5,6,7,1)
+";
+
+$stmtChannel = $conn->prepare($sqlChannelDaily);
+if ($types) $stmtChannel->bind_param($types, ...$params);
+$stmtChannel->execute();
+$resChannel = $stmtChannel->get_result();
+
+$channelLabels = [];
+$channelOnline = [];
+$channelWalkin = [];
+
+/* map วัน */
+$days = [
+    2 => "จันทร์",
+    3 => "อังคาร",
+    4 => "พุธ",
+    5 => "พฤหัส",
+    6 => "ศุกร์",
+    7 => "เสาร์",
+    1 => "อาทิตย์"
+];
+
+/* เตรียมค่าเริ่มต้น 0 */
+$onlineMap = [];
+$walkinMap = [];
+
+foreach ($days as $num => $name) {
+    $onlineMap[$num] = 0;
+    $walkinMap[$num] = 0;
+}
+
+/* เติมค่าจาก DB */
+while ($row = $resChannel->fetch_assoc()) {
+    $dayNum = (int)$row["day_num"];
+    $onlineMap[$dayNum] = (int)$row["online"];
+    $walkinMap[$dayNum] = (int)$row["walkin"];
+}
+
+/* เรียงตาม จันทร์ → อาทิตย์ */
+$channelLabels = [];
+$channelOnline = [];
+$channelWalkin = [];
+
+foreach ($days as $num => $name) {
+    $channelLabels[] = $name;
+    $channelOnline[] = $onlineMap[$num];
+    $channelWalkin[] = $walkinMap[$num];
+}
+
+/* ==============================
    RESPONSE
 ============================== */
 
@@ -320,7 +386,7 @@ echo json_encode([
         "bookings"=>$bookings,
         "revenue"=>$revenue
     ],
-     "top5"=>[
+    "top5"=>[
         "labels"=>$topLabels,
         "counts"=>$topCounts
     ],
@@ -336,9 +402,13 @@ echo json_encode([
     "booking_ratio"=>[
         "labels"=>$ratioLabels,
         "data"=>$ratioData
-    ]
+    ],
+"channel_daily"=>[
+    "labels"=>$channelLabels,
+    "online"=>$channelOnline,
+    "walkin"=>$channelWalkin
+]
 ]);
-
 
 } catch (Throwable $e) {
 

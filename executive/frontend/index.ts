@@ -6,9 +6,11 @@ let topChart: any;
 let paymentChart: any;
 let bookingRatioChart: any;
 let profitChart: any;
+let channelChart: any;
+
 
 /* ==============================
-   INIT
+	 INIT
 ============================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -25,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /* ==============================
-   BIND EVENTS
+	 BIND EVENTS
 ============================== */
 
 function bindFilters(): void {
@@ -58,7 +60,7 @@ function bindFilters(): void {
 }
 
 /* ==============================
-   FILTER
+	 FILTER
 ============================== */
 
 interface DashboardFilter {
@@ -104,7 +106,7 @@ function resetFilter(): void {
 }
 
 /* ==============================
-   LOAD DASHBOARD
+	 LOAD DASHBOARD
 ============================== */
 
 async function loadAll(): Promise<void> {
@@ -128,6 +130,7 @@ async function loadAll(): Promise<void> {
 		updatePayment(result.payment_ratio);
 		updateBookingRatio(result.booking_ratio);
 		updateTop5(result.top5);
+		updateChannelDaily(result.channel_daily);
 
 	} catch (err) {
 		console.error("โหลด Dashboard ไม่สำเร็จ", err);
@@ -135,7 +138,7 @@ async function loadAll(): Promise<void> {
 }
 
 /* ==============================
-   KPI
+	 KPI
 ============================== */
 
 function updateKPI(kpi: any): void {
@@ -150,12 +153,12 @@ function updateKPI(kpi: any): void {
 	document.getElementById("kpiExpense")!.textContent =
 		Number(kpi?.total_expense ?? 0).toLocaleString() + " บาท";
 
-		document.getElementById("kpiProfit")!.textContent =
+	document.getElementById("kpiProfit")!.textContent =
 		Number(kpi?.net_profit ?? 0).toLocaleString() + " บาท";
 }
 
 /* ==============================
-   TREND
+	 TREND
 ============================== */
 
 function updateTrend(trend: any): void {
@@ -167,7 +170,7 @@ function updateTrend(trend: any): void {
 }
 
 /* ==============================
-   PROFIT
+	 PROFIT
 ============================== */
 
 function updateProfit(data: any): void {
@@ -179,7 +182,7 @@ function updateProfit(data: any): void {
 }
 
 /* ==============================
-   PAYMENT PIE
+	 PAYMENT PIE
 ============================== */
 
 function updatePayment(data: any): void {
@@ -190,7 +193,7 @@ function updatePayment(data: any): void {
 }
 
 /* ==============================
-   BOOKING RATIO PIE
+	 BOOKING RATIO PIE
 ============================== */
 
 function updateBookingRatio(data: any): void {
@@ -201,7 +204,7 @@ function updateBookingRatio(data: any): void {
 }
 
 /* ==============================
-   DROPDOWNS (FIXED)
+	 DROPDOWNS (FIXED)
 ============================== */
 
 async function loadRegions(): Promise<void> {
@@ -261,7 +264,7 @@ function updateTop5(top: any): void {
 
 	const colors = [];
 	for (let i = 0; i < count; i++) {
-		const opacity = 1 - (i * 0.12);
+		const opacity = 1 - (i * 0.05);
 		colors.push(`rgba(255,122,0,${opacity})`);
 	}
 
@@ -272,58 +275,68 @@ function updateTop5(top: any): void {
 	topChart.update();
 }
 
+function updateChannelDaily(data: any): void {
+
+	channelChart.data.labels = data?.labels || [];
+	channelChart.data.datasets[0].data = data?.online || [];
+	channelChart.data.datasets[1].data = data?.walkin || [];
+
+	channelChart.update();
+}
+
+
 /* ==============================
-   INIT CHARTS
+	 INIT CHARTS
 ============================== */
 
 function initCharts(): void {
 
 	trendChart = new Chart(document.getElementById("trendChart"), {
-	type: "line",
-	data: {
-		labels: [],
-		datasets: [
-			{
-				label: "จำนวนการจอง",
-				data: [],
-				borderColor: "#ff7a00",
-				yAxisID: "yBookings",
-				tension: 0.3
-			},
-			{
-				label: "รายได้",
-				data: [],
-				borderColor: "#3b82f6",
-				yAxisID: "yRevenue",
-				tension: 0.3
-			}
-		]
-	},
-	options: {
-		responsive: true,
-		scales: {
-			yBookings: {
-				type: "linear",
-				position: "left",
-				title: {
-					display: true,
-					text: "จำนวนการจอง"
-				}
-			},
-			yRevenue: {
-				type: "linear",
-				position: "right",
-				grid: {
-					drawOnChartArea: false
+		type: "line",
+		data: {
+			labels: [],
+			datasets: [
+				{
+					label: "จำนวนการจอง",
+					data: [],
+					borderColor: "#ff7a00",
+					yAxisID: "yBookings",
+					tension: 0.3
 				},
-				title: {
-					display: true,
-					text: "รายได้ (บาท)"
+				{
+					label: "รายได้",
+					data: [],
+					borderColor: "#3b82f6",
+					yAxisID: "yRevenue",
+					tension: 0.3
+				}
+			]
+		},
+		options: {
+			responsive: true,
+			scales: {
+				yBookings: {
+					type: "linear",
+					position: "left",
+					title: {
+						display: true,
+						text: "จำนวนการจอง"
+					}
+				},
+				yRevenue: {
+					type: "linear",
+					position: "right",
+					grid: {
+						drawOnChartArea: false
+					},
+					title: {
+						display: true,
+						text: "รายได้ (บาท)"
+					}
 				}
 			}
 		}
-	}
-});
+	});
 
 	topChart = new Chart(document.getElementById("topChart"), {
 		type: "bar",
@@ -332,36 +345,50 @@ function initCharts(): void {
 			datasets: [
 				{ label: "จำนวนครั้งที่ถูกจอง", data: [] }
 			]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: { position: "top" }
+			}
 		}
 	});
 
-paymentChart = new Chart(document.getElementById("paymentChart"), {
-	type: "pie",
-	data: {
-		labels: [],
-		datasets: [{
-			data: [],
-			backgroundColor: [
-				"#22c55e",
-				"#8b5cf6"
-			]
-		}]
-	}
-});
+	paymentChart = new Chart(document.getElementById("paymentChart"), {
+		type: "doughnut",
+		data: {
+			labels: [],
+			datasets: [{
+				data: [],
+				backgroundColor: [
+					"#22c55e",
+					"#8b5cf6"
+				],
+				borderWidth: 0
+			}]
+		},
+		options: {
+			cutout: "65%",
+			plugins: {
+				legend: { position: "top" }
+			}
+		}
+	});
 
-bookingRatioChart = new Chart(document.getElementById("bookingRatioChart"), {
-	type: "pie",
-	data: {
-		labels: [],
-		datasets: [{
-			data: [],
-			backgroundColor: [
-				"#ff7a00",
-				"#3b82f6"
-			]
-		}]
-	}
-});
+	bookingRatioChart = new Chart(document.getElementById("bookingRatioChart"), {
+		type: "pie",
+		data: {
+			labels: [],
+			datasets: [{
+				data: [],
+				backgroundColor: [
+					"#ff53d7",
+					"#1ea9ff"
+				]
+			}]
+		}
+	});
 
 	profitChart = new Chart(document.getElementById("profitChart"), {
 		type: "line",
@@ -373,4 +400,35 @@ bookingRatioChart = new Chart(document.getElementById("bookingRatioChart"), {
 			]
 		}
 	});
+
+	channelChart = new Chart(
+	document.getElementById("channelChart"),
+	{
+		type: "bar",
+		data: {
+			labels: [],
+			datasets: [
+				{
+					label: "ออนไลน์",
+					data: [],
+					backgroundColor: "#1ea9ff"
+				},
+				{
+					label: "หน้าร้าน",
+					data: [],
+					backgroundColor: "#ff53d7"
+				}
+			]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: { position: "top" }
+			}
+		}
+	}
+);
+
+
 }

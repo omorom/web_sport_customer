@@ -40,8 +40,9 @@ var topChart;
 var paymentChart;
 var bookingRatioChart;
 var profitChart;
+var channelChart;
 /* ==============================
-   INIT
+     INIT
 ============================== */
 document.addEventListener("DOMContentLoaded", function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
@@ -64,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () { return __awaiter(_th
     });
 }); });
 /* ==============================
-   BIND EVENTS
+     BIND EVENTS
 ============================== */
 function bindFilters() {
     var _a;
@@ -118,7 +119,7 @@ function resetFilter() {
     loadAll();
 }
 /* ==============================
-   LOAD DASHBOARD
+     LOAD DASHBOARD
 ============================== */
 function loadAll() {
     return __awaiter(this, void 0, void 0, function () {
@@ -143,6 +144,7 @@ function loadAll() {
                     updatePayment(result.payment_ratio);
                     updateBookingRatio(result.booking_ratio);
                     updateTop5(result.top5);
+                    updateChannelDaily(result.channel_daily);
                     return [3 /*break*/, 4];
                 case 3:
                     err_1 = _a.sent();
@@ -154,7 +156,7 @@ function loadAll() {
     });
 }
 /* ==============================
-   KPI
+     KPI
 ============================== */
 function updateKPI(kpi) {
     var _a, _b, _c, _d;
@@ -168,7 +170,7 @@ function updateKPI(kpi) {
         Number((_d = kpi === null || kpi === void 0 ? void 0 : kpi.net_profit) !== null && _d !== void 0 ? _d : 0).toLocaleString() + " บาท";
 }
 /* ==============================
-   TREND
+     TREND
 ============================== */
 function updateTrend(trend) {
     trendChart.data.labels = (trend === null || trend === void 0 ? void 0 : trend.labels) || [];
@@ -177,7 +179,7 @@ function updateTrend(trend) {
     trendChart.update();
 }
 /* ==============================
-   PROFIT
+     PROFIT
 ============================== */
 function updateProfit(data) {
     profitChart.data.labels = (data === null || data === void 0 ? void 0 : data.labels) || [];
@@ -186,7 +188,7 @@ function updateProfit(data) {
     profitChart.update();
 }
 /* ==============================
-   PAYMENT PIE
+     PAYMENT PIE
 ============================== */
 function updatePayment(data) {
     paymentChart.data.labels = (data === null || data === void 0 ? void 0 : data.labels) || [];
@@ -194,7 +196,7 @@ function updatePayment(data) {
     paymentChart.update();
 }
 /* ==============================
-   BOOKING RATIO PIE
+     BOOKING RATIO PIE
 ============================== */
 function updateBookingRatio(data) {
     bookingRatioChart.data.labels = (data === null || data === void 0 ? void 0 : data.labels) || [];
@@ -202,7 +204,7 @@ function updateBookingRatio(data) {
     bookingRatioChart.update();
 }
 /* ==============================
-   DROPDOWNS (FIXED)
+     DROPDOWNS (FIXED)
 ============================== */
 function loadRegions() {
     return __awaiter(this, void 0, void 0, function () {
@@ -281,7 +283,7 @@ function updateTop5(top) {
     var count = ((_a = top === null || top === void 0 ? void 0 : top.counts) === null || _a === void 0 ? void 0 : _a.length) || 0;
     var colors = [];
     for (var i = 0; i < count; i++) {
-        var opacity = 1 - (i * 0.12);
+        var opacity = 1 - (i * 0.05);
         colors.push("rgba(255,122,0,".concat(opacity, ")"));
     }
     topChart.data.labels = (top === null || top === void 0 ? void 0 : top.labels) || [];
@@ -289,8 +291,14 @@ function updateTop5(top) {
     topChart.data.datasets[0].backgroundColor = colors;
     topChart.update();
 }
+function updateChannelDaily(data) {
+    channelChart.data.labels = (data === null || data === void 0 ? void 0 : data.labels) || [];
+    channelChart.data.datasets[0].data = (data === null || data === void 0 ? void 0 : data.online) || [];
+    channelChart.data.datasets[1].data = (data === null || data === void 0 ? void 0 : data.walkin) || [];
+    channelChart.update();
+}
 /* ==============================
-   INIT CHARTS
+     INIT CHARTS
 ============================== */
 function initCharts() {
     trendChart = new Chart(document.getElementById("trendChart"), {
@@ -346,10 +354,17 @@ function initCharts() {
             datasets: [
                 { label: "จำนวนครั้งที่ถูกจอง", data: [] }
             ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "top" }
+            }
         }
     });
     paymentChart = new Chart(document.getElementById("paymentChart"), {
-        type: "pie",
+        type: "doughnut",
         data: {
             labels: [],
             datasets: [{
@@ -357,8 +372,15 @@ function initCharts() {
                     backgroundColor: [
                         "#22c55e",
                         "#8b5cf6"
-                    ]
+                    ],
+                    borderWidth: 0
                 }]
+        },
+        options: {
+            cutout: "65%",
+            plugins: {
+                legend: { position: "top" }
+            }
         }
     });
     bookingRatioChart = new Chart(document.getElementById("bookingRatioChart"), {
@@ -368,8 +390,8 @@ function initCharts() {
             datasets: [{
                     data: [],
                     backgroundColor: [
-                        "#ff7a00",
-                        "#3b82f6"
+                        "#ff53d7",
+                        "#1ea9ff"
                     ]
                 }]
         }
@@ -382,6 +404,31 @@ function initCharts() {
                 { label: "รายได้", data: [], borderColor: "#22c55e" },
                 { label: "ค่าใช้จ่าย", data: [], borderColor: "#ef4444" }
             ]
+        }
+    });
+    channelChart = new Chart(document.getElementById("channelChart"), {
+        type: "bar",
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: "ออนไลน์",
+                    data: [],
+                    backgroundColor: "#1ea9ff"
+                },
+                {
+                    label: "หน้าร้าน",
+                    data: [],
+                    backgroundColor: "#ff53d7"
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "top" }
+            }
         }
     });
 }

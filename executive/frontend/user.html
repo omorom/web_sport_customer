@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>User Dashboard</title>
+
+  <link rel="stylesheet" href="css/user.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <header class="main-header">
+
+    <div class="header-top">
+
+      <div class="brand">
+        <span class="brand-name">ระบบเช่าอุปกรณ์กีฬา</span>
+        <small>Sports Equipment Rental System</small>
+      </div>
+
+      <div class="staff-zone">
+        <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+      </div>
+
+    </div>
+
+    <div class="header-bottom">
+      <nav class="main-nav">
+        <a href="index.html" class="nav-item">ภาพรวมอุปกรณ์</a>
+        <a href="user.html" class="nav-item active">ผู้ใช้</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <h3>ตัวกรอง</h3>
+
+      <label>ช่วงเวลา</label>
+      <select id="rangeSelect">
+        <option value="30days" selected>30 วัน</option>
+        <option value="7days">7 วัน</option>
+        <option value="1year">1 ปี</option>
+        <option value="custom">กำหนดเอง</option>
+      </select>
+
+      <div id="customDateBox" style="display:none;">
+        <input type="date" id="startDate">
+        <input type="date" id="endDate">
+      </div>
+
+      <label>ภูมิภาค</label>
+      <select id="regionSelect"></select>
+
+      <label>จังหวัด</label>
+      <select id="provinceSelect"></select>
+
+      <label>สาขา</label>
+      <select id="branchSelect"></select>
+
+      <label>ประเภทลูกค้า</label>
+      <select id="customerTypeSelect">
+        <option value="">ทั้งหมด</option>
+        <option value="student">นักศึกษา</option>
+        <option value="general">บุคคลทั่วไป</option>
+      </select>
+
+      <label>คณะ</label>
+      <select id="facultySelect"></select>
+
+      <label>ชั้นปี</label>
+      <select id="studyYearSelect">
+        <option value="">ทั้งหมด</option>
+        <option value="1">ปี 1</option>
+        <option value="2">ปี 2</option>
+        <option value="3">ปี 3</option>
+        <option value="4">ปี 4</option>
+      </select>
+
+      <button id="resetFilter" class="btn-reset">รีเซ็ต</button>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- ================= KPI ================= -->
+      <section class="kpi-grid">
+
+        <div class="kpi-card blue">
+          <div class="kpi-title">ผู้ใช้ทั้งหมด</div>
+          <div class="kpi-value" id="totalUsers">0</div>
+        </div>
+
+        <div class="kpi-card green">
+          <div class="kpi-title">นักศึกษา</div>
+          <div class="kpi-value" id="studentPercent">0%</div>
+        </div>
+
+        <div class="kpi-card purple">
+          <div class="kpi-title">บุคคลภายนอก</div>
+          <div class="kpi-value" id="externalPercent">0%</div>
+        </div>
+
+        <div class="kpi-card orange">
+          <div class="kpi-title">การจองเฉลี่ยต่อคน</div>
+          <div class="kpi-value" id="avgBooking">0</div>
+        </div>
+
+      </section>
+
+
+      <!-- ================= USER STRUCTURE ================= -->
+
+      <section class="grid-2">
+
+        <div class="card">
+          <h3>สัดส่วนเพศ</h3>
+          <canvas id="genderChart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>ผู้ใช้ตามชั้นปี</h3>
+          <canvas id="yearChart"></canvas>
+        </div>
+
+      </section>
+
+      <section class="grid-2">
+
+        <div class="card">
+          <h3>Top Faculty</h3>
+          <canvas id="facultyChart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>ผู้ใช้ตามสาขา (Top 5)</h3>
+          <canvas id="branchChart"></canvas>
+        </div>
+
+      </section>
+
+
+      <!-- ================= TOP USER ================= -->
+
+      <section class="card large-card">
+        <h3>Top 10 ผู้ใช้</h3>
+        <canvas id="topUserChart"></canvas>
+      </section>
+
+
+    </main>
+  </div>
+
+  <script src="user.js"></script>
+</body>
+
+</html>
