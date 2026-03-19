@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Rector Dashboard</title>
+
+	<link rel="stylesheet" href="css/index.css">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+	<header class="main-header">
+
+		<div class="header-top">
+
+			<div class="brand">
+				<span class="brand-name">ระบบเช่าอุปกรณ์กีฬา</span>
+				<small>Sports Equipment Rental System</small>
+			</div>
+
+			<div class="staff-zone">
+				<a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+			</div>
+
+		</div>
+
+		<div class="header-bottom">
+			<nav class="main-nav">
+				<a href="index.html" class="nav-item active">ภาพรวม</a>
+				<a href="equipment.html" class="nav-item">อุปกรณ์</a>
+				<a href="customer.html" class="nav-item">ลูกค้า</a>
+			</nav>
+		</div>
+	</header>
+
+	<div class="container">
+
+		<!-- ================= SIDEBAR FILTER ================= -->
+		<aside class="sidebar">
+			<h3>ตัวกรองข้อมูล</h3>
+
+			<label>ช่วงเวลา</label>
+			<select id="rangeSelect">
+				<option value="all" selected>ทั้งหมด</option>
+				<option value="7days">7 วันล่าสุด</option>
+				<option value="30days">30 วันล่าสุด</option>
+				<option value="1year">1 ปีล่าสุด</option>
+				<option value="custom">กำหนดเอง</option>
+			</select>
+
+			<div id="customDateBox" class="custom-date" style="display:none;">
+				<input type="date" id="startDate">
+				<input type="date" id="endDate">
+			</div>
+
+			<label>ประเภทลูกค้า</label>
+			<select id="userTypeSelect">
+				<option value="">ทั้งหมด</option>
+				<option value="student">นิสิต/นักศึกษา</option>
+				<option value="general">บุคคลภายนอก</option>
+			</select>
+
+			<label>คณะ</label>
+			<select id="facultySelect">
+				<option value="">ทุกคณะ</option>
+			</select>
+
+			<label>ชั้นปี</label>
+			<select id="yearSelect">
+			</select>
+
+			<label>รูปแบบการเช่า</label>
+			<select id="bookingTypeSelect">
+				<option value="">ทั้งหมด</option>
+				<option value="online">Online</option>
+				<option value="walkin">Walk-in</option>
+			</select>
+
+			<button id="resetFilter" class="btn-reset">รีเซ็ตตัวกรอง</button>
+		</aside>
+
+		<main class="main">
+
+			<section class="kpi-grid">
+				<div class="kpi-card">
+					<div class="kpi-title">รายได้รวม</div>
+					<div class="kpi-value" id="kpiRevenue">0</div>
+					<div class="kpi-unit">บาท</div>
+				</div>
+				<div class="kpi-card">
+					<div class="kpi-title">ผู้ใช้ทั้งหมด</div>
+					<div class="kpi-value" id="kpiUsers">0</div>
+					<div class="kpi-unit">คน</div>
+				</div>
+				<div class="kpi-card">
+					<div class="kpi-title">รายการจองทั้งหมด</div>
+					<div class="kpi-value" id="kpiBookings">0</div>
+					<div class="kpi-unit">ครั้ง</div>
+				</div>
+				<div class="kpi-card">
+					<div class="kpi-title">อัตราการใช้งานรวม</div>
+					<div class="kpi-value" id="kpiUtil">0%</div>
+				</div>
+			</section>
+
+			<section class="card">
+				<div class="card-header">
+					<h3>แนวโน้มการจอง (Booking Trend)</h3>
+				</div>
+				<div class="chart-container" style="height: 300px;">
+					<canvas id="bookingTrendChart"></canvas>
+				</div>
+			</section>
+
+			<div class="grid-2">
+				<section class="card">
+					<div class="card-header">
+						<h3>สัดส่วน Online vs Walk-in</h3>
+					</div>
+					<div class="chart-container" style="display: flex; justify-content: center; height: 250px;">
+						<canvas id="bookingSourceChart"></canvas>
+					</div>
+				</section>
+
+				<section class="card">
+					<div class="card-header">
+						<h3>ความหนาแน่นการใช้งานรายชั่วโมง</h3>
+					</div>
+
+					<div class="chart-container" style="height: 300px;">
+						<canvas id="peakHourBarChart"></canvas>
+					</div>
+				</section>
+			</div>
+
+		</main>
+	</div>
+
+	<script src="index.js"></script>
+</body>
+
+</html>

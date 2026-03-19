@@ -28,7 +28,7 @@ JOIN region r ON p.region_id = r.region_id
 ";
 
 /* ==============================
-   WHERE BASE
+   WHERE (BOOKING BASE)
 ============================== */
 
 $where = [];
@@ -49,8 +49,8 @@ if ($province_id !== "") {
 
 if ($branch_id !== "") {
     $where[] = "bk.branch_id = ?";
-    $params[] = (int)$branch_id;
-    $types .= "i";
+    $params[] = $branch_id;
+    $types .= "s";
 }
 
 /* DATE */
@@ -156,7 +156,13 @@ FROM (
 ============================== */
 
 $stmt = $conn->prepare("
-SELECT cnt, COUNT(*) total
+SELECT 
+    CASE 
+        WHEN cnt BETWEEN 1 AND 4 THEN '(1–4 ครั้ง)'
+        WHEN cnt BETWEEN 5 AND 10 THEN '(5–10 ครั้ง)'
+        ELSE '(11 ครั้งขึ้นไป)'
+    END AS booking_group,
+    COUNT(*) total
 FROM (
     SELECT bk.customer_id, COUNT(*) cnt
     FROM bookings bk
@@ -164,8 +170,13 @@ FROM (
     $whereSQL
     GROUP BY bk.customer_id
 ) t
-GROUP BY cnt
-ORDER BY cnt ASC
+GROUP BY booking_group
+ORDER BY 
+    CASE 
+        WHEN booking_group = '(1–4 ครั้ง)' THEN 1
+        WHEN booking_group = '(5–10 ครั้ง)' THEN 2
+        ELSE 3
+    END
 ");
 
 if (!$stmt) throw new Exception($conn->error);
@@ -178,7 +189,7 @@ $labels = [];
 $data   = [];
 
 while ($row = $res->fetch_assoc()) {
-    $labels[] = $row["cnt"] . " ครั้ง";
+    $labels[] = $row["booking_group"];
     $data[]   = (int)$row["total"];
 }
 
@@ -194,7 +205,9 @@ $typeSQL = count($typeWhere)
     : "";
 
 $stmtType = $conn->prepare("
-SELECT c.customer_type, SUM(bk.net_amount) revenue
+SELECT 
+    c.customer_type,
+    SUM(bk.net_amount) revenue
 FROM bookings bk
 JOIN customers c ON bk.customer_id = c.customer_id
 $join
@@ -204,6 +217,7 @@ GROUP BY c.customer_type
 
 if (!$stmtType) throw new Exception($conn->error);
 if ($types) $stmtType->bind_param($types, ...$params);
+
 $stmtType->execute();
 
 $typeLabels = [];
@@ -219,19 +233,27 @@ while ($row = $resType->fetch_assoc()) {
    CHART 4: CANCEL BY TYPE
 ============================== */
 
+$typeWhere = $where;
+$typeWhere[] = "bk.booking_status_id = 6";
+
+$typeSQL = count($typeWhere)
+    ? "WHERE " . implode(" AND ", $typeWhere)
+    : "";
+
 $stmtCT = $conn->prepare("
-SELECT c.customer_type,
-SUM(CASE WHEN bk.booking_status_id = 6 THEN 1 ELSE 0 END) cancelled,
-COUNT(*) total
+SELECT 
+    c.customer_type,
+    COUNT(*) cancelled
 FROM bookings bk
 JOIN customers c ON bk.customer_id = c.customer_id
 $join
-$whereSQL
+$typeSQL
 GROUP BY c.customer_type
 ");
 
 if (!$stmtCT) throw new Exception($conn->error);
 if ($types) $stmtCT->bind_param($types, ...$params);
+
 $stmtCT->execute();
 
 $cancelTypeLabels = [];
@@ -239,9 +261,8 @@ $cancelTypeData = [];
 
 $resCT = $stmtCT->get_result();
 while ($row = $resCT->fetch_assoc()) {
-    $rate = ($row["total"] > 0) ? ($row["cancelled"] / $row["total"]) * 100 : 0;
     $cancelTypeLabels[] = $row["customer_type"];
-    $cancelTypeData[]   = round($rate,2);
+    $cancelTypeData[]   = (int)$row["cancelled"];
 }
 
 /* ==============================
@@ -295,8 +316,8 @@ if ($province_id !== "") {
 
 if ($branch_id !== "") {
     $whereBranch[] = "b.branch_id = ?";
-    $paramsBranch[] = (int)$branch_id;
-    $typesBranch .= "i";
+    $paramsBranch[] = $branch_id;
+    $typesBranch .= "s";
 }
 
 if ($whereBranch) {

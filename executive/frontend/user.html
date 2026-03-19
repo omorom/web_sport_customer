@@ -29,7 +29,7 @@
 		<div class="header-bottom">
 			<nav class="main-nav">
 				<a href="index.html" class="nav-item">Dashboard</a>
-				<a href="user.html" class="nav-item active">ลูกค้า</a>
+				<a href="user.html" class="nav-item active">ผู้ใช้</a>
 				<a href="equipment_dashboard.html" class="nav-item">อุปกรณ์</a>
 			</nav>
 		</div>
@@ -57,13 +57,19 @@
 			</div>
 
 			<label>ภูมิภาค</label>
-			<select id="regionSelect"></select>
+			<select id="regionSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
 
 			<label>จังหวัด</label>
-			<select id="provinceSelect"></select>
+			<select id="provinceSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
 
 			<label>สาขา</label>
-			<select id="branchSelect"></select>
+			<select id="branchSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
 
 			<button id="resetFilter" class="btn-reset">รีเซ็ตตัวกรอง</button>
 
@@ -99,7 +105,7 @@
 			</section>
 
 
-			<!-- 🔥 TREND -->
+			<!-- TREND -->
 			<section class="grid-2">
 
 				<div class="card">
@@ -131,7 +137,7 @@
 			</section>
 
 
-			<!-- EMPTY (เผื่ออนาคต) -->
+			<!-- BRANCH -->
 			<section class="card">
 				<h3>การใช้งานตามสาขา</h3>
 				<canvas id="topChart"></canvas>
@@ -141,8 +147,8 @@
 
 	</div>
 
-	<!-- 🔥 IMPORTANT -->
-	<script src="user.js"></script>
+	<!-- 🔥 ใช้ defer กัน script รันเร็วเกิน -->
+	<script src="user.js" defer></script>
 
 </body>
 </html>

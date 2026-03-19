@@ -19,20 +19,57 @@ document.addEventListener("DOMContentLoaded", function () {
     loadProvinces();
     loadBranches();
     bindFilters();
+    toggleDateInput();
     loadAll();
 });
+function toggleDateInput() {
+    var _a;
+    var range = (_a = document.getElementById("rangeSelect")) === null || _a === void 0 ? void 0 : _a.value;
+    var box = document.getElementById("customDateBox");
+    if (!box)
+        return;
+    if (range === "custom") {
+        box.style.display = "block";
+    }
+    else {
+        box.style.display = "none";
+    }
+}
 /* ============================== FILTER */
 function bindFilters() {
     var _a;
-    var ids = ["rangeSelect", "regionSelect", "provinceSelect", "branchSelect", "startDate", "endDate"];
+    var ids = [
+        "rangeSelect",
+        "regionSelect",
+        "provinceSelect",
+        "branchSelect",
+        "startDate",
+        "endDate"
+    ];
     ids.forEach(function (id) {
         var el = document.getElementById(id);
         if (!el)
             return;
-        el.addEventListener("change", loadAll);
+        el.addEventListener("change", function () {
+            if (id === "rangeSelect") {
+                toggleCustomDate();
+            }
+            if (id === "regionSelect") {
+                loadProvinces();
+                loadBranches();
+            }
+            if (id === "provinceSelect") {
+                loadBranches();
+            }
+            // 🔥 ยิงทุกครั้ง
+            loadAll();
+        });
     });
-    (_a = document.getElementById("resetFilter")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", function () { return location.reload(); });
+    (_a = document.getElementById("resetFilter")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", resetFilter);
 }
+/* ==============================
+     FILTER LOGIC
+============================== */
 function getFilter() {
     var _a, _b, _c, _d, _e, _f;
     return {
@@ -43,6 +80,20 @@ function getFilter() {
         province_id: ((_e = document.getElementById("provinceSelect")) === null || _e === void 0 ? void 0 : _e.value) || "",
         branch_id: ((_f = document.getElementById("branchSelect")) === null || _f === void 0 ? void 0 : _f.value) || ""
     };
+}
+function toggleCustomDate() {
+    var range = document.getElementById("rangeSelect").value;
+    var box = document.getElementById("customDateBox");
+    box.style.display = range === "custom" ? "block" : "none";
+}
+function resetFilter() {
+    document.getElementById("rangeSelect").value = "30days";
+    document.getElementById("regionSelect").value = "";
+    document.getElementById("provinceSelect").value = "";
+    document.getElementById("branchSelect").value = "";
+    document.getElementById("startDate").value = "";
+    document.getElementById("endDate").value = "";
+    loadAll();
 }
 /* ============================== UTIL */
 function safeArray(arr) {
@@ -79,7 +130,6 @@ function loadAll() {
                 (_d = (_c = charts.new_vs_returning) === null || _c === void 0 ? void 0 : _c.returning) !== null && _d !== void 0 ? _d : 0
             ]
         });
-        /* 🔥 dynamic booking group (ตรงกับ PHP ใหม่) */
         updateRevenueTrend({
             labels: (_f = (_e = charts.booking_group) === null || _e === void 0 ? void 0 : _e.labels) !== null && _f !== void 0 ? _f : [],
             revenue: (_h = (_g = charts.booking_group) === null || _g === void 0 ? void 0 : _g.data) !== null && _h !== void 0 ? _h : []
@@ -113,17 +163,25 @@ function updateKPI(kpi) {
 }
 /* ============================== CHART UPDATE */
 function updateRevenueTrend(data) {
-    var _a, _b;
     if (!revenueTrendChart)
         return;
-    var values = (_a = data === null || data === void 0 ? void 0 : data.revenue) !== null && _a !== void 0 ? _a : [];
-    if (!values.length)
-        values = [0];
-    var maxY = getNiceMax(values);
+    // 🎯 กำหนดกลุ่มมาตรฐาน
+    var standardLabels = [
+        "(1–4 ครั้ง)",
+        "(5–10 ครั้ง)",
+        "(11 ครั้งขึ้นไป)"
+    ];
+    var map = {};
+    // map ค่าที่มีอยู่
+    ((data === null || data === void 0 ? void 0 : data.labels) || []).forEach(function (label, i) {
+        map[label] = data.revenue[i];
+    });
+    var finalData = standardLabels.map(function (label) { var _a; return (_a = map[label]) !== null && _a !== void 0 ? _a : 0; });
+    var maxY = getNiceMax(finalData);
     revenueTrendChart.options.scales.y.min = 0;
     revenueTrendChart.options.scales.y.max = maxY;
-    revenueTrendChart.data.labels = (_b = data === null || data === void 0 ? void 0 : data.labels) !== null && _b !== void 0 ? _b : [];
-    revenueTrendChart.data.datasets[0].data = values;
+    revenueTrendChart.data.labels = standardLabels;
+    revenueTrendChart.data.datasets[0].data = finalData;
     revenueTrendChart.update();
 }
 function updateChannel(data) {
@@ -148,13 +206,18 @@ function updateBookingTrend(data) {
     bookingTrendChart.update();
 }
 function updateBookingRatio(data) {
-    var _a, _b;
+    var _a;
     if (!bookingRatioChart)
         return;
     var values = (_a = data === null || data === void 0 ? void 0 : data.data) !== null && _a !== void 0 ? _a : [];
     if (!values.length)
         values = [1];
-    bookingRatioChart.data.labels = (_b = data === null || data === void 0 ? void 0 : data.labels) !== null && _b !== void 0 ? _b : ["ไม่มีข้อมูล"];
+    var labelMap = {
+        general: "บุคคลทั่วไป",
+        student: "นิสิต/นักศึกษา"
+    };
+    var labels = ((data === null || data === void 0 ? void 0 : data.labels) || []).map(function (l) { return labelMap[l] || l; });
+    bookingRatioChart.data.labels = labels;
     bookingRatioChart.data.datasets[0].data = values;
     bookingRatioChart.update();
 }
@@ -171,7 +234,9 @@ function updateBranches(data) {
     branchChart.data.datasets[0].data = values;
     branchChart.update();
 }
-/* ============================== DROPDOWN */
+/* ==============================
+     DROPDOWNS
+============================== */
 function loadRegions() {
     fetch("/sports_rental_system/executive/api/get_regions.php")
         .then(function (res) { return res.json(); })
@@ -206,7 +271,7 @@ function loadBranches() {
     var _a, _b;
     var regionId = ((_a = document.getElementById("regionSelect")) === null || _a === void 0 ? void 0 : _a.value) || "";
     var provinceId = ((_b = document.getElementById("provinceSelect")) === null || _b === void 0 ? void 0 : _b.value) || "";
-    fetch("/sports_rental_system/executive/api/get_branches.php", {
+    return fetch("/sports_rental_system/executive/api/get_branches.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -248,19 +313,55 @@ function initCharts() {
     };
     bookingTrendChart = new Chart(document.getElementById("bookingTrendChart"), {
         type: "doughnut",
-        data: { labels: [], datasets: [{ data: [], backgroundColor: ["#22c55e", "#3b82f6"] }] }
+        data: { labels: [], datasets: [{ data: [], backgroundColor: ["#00ff5e", "#0062ff"] }] }
     });
     revenueTrendChart = new Chart(document.getElementById("revenueTrendChart"), {
         type: "bar",
         data: {
             labels: [],
             datasets: [{
-                    label: "จำนวนลูกค้า",
+                    label: "จำนวนลูกค้า (ตามระดับการใช้งาน)",
                     data: [],
-                    backgroundColor: "#fff700"
+                    backgroundColor: [
+                        "#b0cdff", // ใช้งานน้อย
+                        "#4588fb", // ปานกลาง
+                        "#005bf9" // สูง
+                    ],
                 }]
         },
-        options: baseOptions("คน")
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            var value = context.raw || 0;
+                            return value.toLocaleString() + " คน";
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function (v) { return v + " คน"; }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
     });
     channelChart = new Chart(document.getElementById("channelChart"), {
         type: "bar",
@@ -277,11 +378,34 @@ function initCharts() {
     bookingRatioChart = new Chart(document.getElementById("bookingRatioChart"), {
         type: "doughnut",
         data: {
-            labels: [],
+            labels: ["บุคคลทั่วไป", "นิสิต/นักศึกษา"], // 🔥 label ชัด
             datasets: [{
                     data: [],
-                    backgroundColor: ["#f700ff", "#00ff1e"]
+                    backgroundColor: [
+                        "#3b82f6", // บุคคลทั่วไป (น้ำเงิน)
+                        "#22c55e" // นิสิต/นักศึกษา (เขียว)
+                    ]
                 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: "bottom"
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            var data = context.dataset.data;
+                            var total = data.reduce(function (a, b) { return a + b; }, 0);
+                            var value = context.raw || 0;
+                            var percent = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
+                            return "".concat(context.label, ": ").concat(percent, "% (").concat(value, " \u0E04\u0E19)");
+                        }
+                    }
+                }
+            }
         }
     });
     branchChart = new Chart(document.getElementById("topChart"), {

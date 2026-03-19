@@ -1,271 +1,27 @@
 declare const Chart: any;
 
-let bestEquipmentChart: any;
-let worstEquipmentChart: any;
-let bestVenueChart: any;
-let worstVenueChart: any;
-let expireChart: any;
-let categoryChart: any;
+let popularChart: any;
+let usageChart: any;
+let damageChart: any;
+let damageTopChart: any;
+let repairChart: any;
 
 /* ==============================
    INIT
 ============================== */
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", function () {
 
-  initCharts();
-  await loadDropdowns();
-  bindFilters();
-  loadDashboard();
+	initCharts();
 
+	loadRegions();
+	loadProvinces();
+	loadBranches();
+
+	bindFilters();
+
+	loadAll();
 });
-
-/* ==============================
-   LOAD DASHBOARD
-============================== */
-
-async function loadDashboard(): Promise<void> {
-
-  try {
-
-    const res = await fetch(
-      "/sports_rental_system/executive/api/equipment_dashboard.php",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(getFilter())
-      }
-    );
-
-    const result = await res.json();
-
-    if (result.error) {
-      console.error(result.message);
-      return;
-    }
-
-    updateKPI(result.kpi);
-
-    updateBar(bestEquipmentChart, result.top_best_equipment);
-    updateBar(worstEquipmentChart, result.top_worst_equipment);
-    updateBar(bestVenueChart, result.top_best_venue);
-    updateBar(worstVenueChart, result.top_worst_venue);
-
-    updateExpire(result.expiring_soon);
-    updateCategory(result.category_popular);
-
-  } catch (err) {
-    console.error("โหลด Dashboard ไม่สำเร็จ", err);
-  }
-}
-
-/* ==============================
-   KPI (4 ตัวเท่านั้น)
-============================== */
-
-function updateKPI(kpi: any): void {
-
-  if (!kpi) return;
-
-  document.getElementById("kpiEquipment")!.textContent =
-    String(kpi.total_equipment ?? "-");
-
-  document.getElementById("kpiVenue")!.textContent =
-    String(kpi.total_venues ?? "-");
-
-  document.getElementById("kpiEquipRating")!.textContent =
-    kpi.avg_equipment_rating ?? "-";
-
-  document.getElementById("kpiVenueRating")!.textContent =
-    kpi.avg_venue_rating ?? "-";
-}
-
-/* ==============================
-   UPDATE BAR CHART
-============================== */
-
-function updateBar(chart: any, data: any[]): void {
-
-  if (!chart) return;
-
-  if (!data || data.length === 0) {
-    chart.data.labels = [];
-    chart.data.datasets[0].data = [];
-    chart.update();
-    return;
-  }
-
-  chart.data.labels = data.map(d => d.name);
-  chart.data.datasets[0].data =
-    data.map(d => parseFloat(d.avg_rating));
-
-  chart.update();
-}
-
-/* ==============================
-   UPDATE EXPIRE
-============================== */
-
-function updateExpire(data: any[]): void {
-
-  if (!expireChart) return;
-
-  if (!data || data.length === 0) {
-    expireChart.data.labels = [];
-    expireChart.data.datasets[0].data = [];
-    expireChart.update();
-    return;
-  }
-
-  expireChart.data.labels = data.map(d => d.name);
-  expireChart.data.datasets[0].data =
-    data.map(d => parseInt(d.total));
-
-  expireChart.update();
-}
-
-/* ==============================
-   UPDATE CATEGORY PIE
-============================== */
-
-function updateCategory(data: any): void {
-
-  if (!categoryChart) return;
-
-  if (!data || !data.labels) {
-    categoryChart.data.labels = [];
-    categoryChart.data.datasets[0].data = [];
-    categoryChart.update();
-    return;
-  }
-
-  categoryChart.data.labels = data.labels;
-  categoryChart.data.datasets[0].data = data.data;
-  categoryChart.update();
-}
-
-/* ==============================
-   INIT CHARTS
-============================== */
-
-function initCharts(): void {
-
-  bestEquipmentChart = createBarChart("bestEquipmentChart", "#22c55e");
-  worstEquipmentChart = createBarChart("worstEquipmentChart", "#ef4444");
-  bestVenueChart = createBarChart("bestVenueChart", "#3b82f6");
-  worstVenueChart = createBarChart("worstVenueChart", "#f97316");
-  expireChart = createBarChart("expireChart", "#f59e0b");
-
-  categoryChart = new Chart(
-    document.getElementById("categoryChart"),
-    {
-      type: "pie",
-      data: {
-        labels: [],
-        datasets: [{
-          data: [],
-          backgroundColor: [
-            "#6366f1",
-            "#8b5cf6",
-            "#ec4899",
-            "#22c55e",
-            "#f59e0b"
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: "bottom" }
-        }
-      }
-    }
-  );
-}
-
-/* ==============================
-   BAR FACTORY
-============================== */
-
-function createBarChart(id: string, color: string): any {
-
-  return new Chart(
-    document.getElementById(id),
-    {
-      type: "bar",
-      data: {
-        labels: [],
-        datasets: [{
-          label: "คะแนนเฉลี่ย",
-          data: [],
-          backgroundColor: color,
-          borderRadius: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 5
-          }
-        }
-      }
-    }
-  );
-}
-
-/* ==============================
-   FILTER
-============================== */
-
-function getFilter() {
-
-  return {
-    range: (document.getElementById("rangeSelect") as HTMLSelectElement)?.value || "",
-    start: (document.getElementById("startDate") as HTMLInputElement)?.value || "",
-    end: (document.getElementById("endDate") as HTMLInputElement)?.value || "",
-    region_id: (document.getElementById("regionSelect") as HTMLSelectElement)?.value || "",
-    province_id: (document.getElementById("provinceSelect") as HTMLSelectElement)?.value || "",
-    branch_id: (document.getElementById("branchSelect") as HTMLSelectElement)?.value || "",
-    category_id: (document.getElementById("categorySelect") as HTMLSelectElement)?.value || "",
-    equipment_id: (document.getElementById("equipmentSelect") as HTMLSelectElement)?.value || ""
-  };
-}
-
-/* ==============================
-   DROPDOWNS
-============================== */
-
-async function loadDropdowns(): Promise<void> {
-
-  await loadSelect("regionSelect", "/api/get_regions.php", "region_id", "region_name");
-  await loadSelect("provinceSelect", "/api/get_provinces.php", "province_id", "name");
-  await loadSelect("branchSelect", "/api/get_branches.php", "branch_id", "name");
-  await loadSelect("categorySelect", "/api/get_categories.php", "category_id", "name");
-  await loadSelect("equipmentSelect", "/api/get_equipment_master.php", "equipment_id", "name");
-}
-
-async function loadSelect(
-  id: string,
-  url: string,
-  valueKey: string,
-  textKey: string
-) {
-
-  const res = await fetch("/sports_rental_system/executive" + url);
-  const json = await res.json();
-
-  const select = document.getElementById(id) as HTMLSelectElement;
-  select.innerHTML = `<option value="">ทั้งหมด</option>`;
-
-  json.data?.forEach((item: any) => {
-    select.innerHTML += `<option value="${item[valueKey]}">${item[textKey]}</option>`;
-  });
-}
 
 /* ==============================
    FILTER EVENTS
@@ -273,35 +29,283 @@ async function loadSelect(
 
 function bindFilters(): void {
 
-  const ids = [
-    "rangeSelect",
-    "regionSelect",
-    "provinceSelect",
-    "branchSelect",
-    "categorySelect",
-    "equipmentSelect",
-    "startDate",
-    "endDate"
-  ];
+	const ids = [
+		"rangeSelect",
+		"regionSelect",
+		"provinceSelect",
+		"branchSelect",
+		"startDate",
+		"endDate"
+	];
 
-  ids.forEach(id => {
-    document.getElementById(id)
-      ?.addEventListener("change", () => {
-        toggleDate();
-        loadDashboard();
-      });
-  });
+	ids.forEach(id => {
+		const el = document.getElementById(id) as any;
+		if (!el) return;
 
-  document.getElementById("resetFilter")
-    ?.addEventListener("click", () => location.reload());
+		el.addEventListener("change", () => {
+
+			if (id === "rangeSelect") toggleCustomDate();
+
+			// 🔥 cascade dropdown
+			if (id === "regionSelect") {
+				loadProvinces();
+				loadBranches();
+			}
+
+			if (id === "provinceSelect") {
+				loadBranches();
+			}
+
+			loadAll();
+		});
+	});
+
+	document.getElementById("resetFilter")
+		?.addEventListener("click", resetFilter);
 }
 
-function toggleDate(): void {
+/* ==============================
+   FILTER
+============================== */
 
-  const box = document.getElementById("customDateBox");
-  if (!box) return;
+function getFilter() {
+	return {
+		range: (document.getElementById("rangeSelect") as any)?.value || "",
+		start: (document.getElementById("startDate") as any)?.value || "",
+		end: (document.getElementById("endDate") as any)?.value || "",
+		region_id: (document.getElementById("regionSelect") as any)?.value || "",
+		province_id: (document.getElementById("provinceSelect") as any)?.value || "",
+		branch_id: (document.getElementById("branchSelect") as any)?.value || ""
+	};
+}
 
-  const range = (document.getElementById("rangeSelect") as HTMLSelectElement)?.value;
+function toggleCustomDate(): void {
+	const range = (document.getElementById("rangeSelect") as any).value;
+	const box = document.getElementById("customDateBox") as HTMLElement;
+	box.style.display = range === "custom" ? "block" : "none";
+}
 
-  box.style.display = range === "custom" ? "block" : "none";
+function resetFilter(): void {
+
+	(document.getElementById("rangeSelect") as any).value = "30days";
+	(document.getElementById("regionSelect") as any).value = "";
+	(document.getElementById("provinceSelect") as any).value = "";
+	(document.getElementById("branchSelect") as any).value = "";
+
+	(document.getElementById("startDate") as any).value = "";
+	(document.getElementById("endDate") as any).value = "";
+
+	loadProvinces();
+	loadBranches();
+
+	loadAll();
+}
+
+/* ==============================
+   LOAD DASHBOARD
+============================== */
+
+function loadAll(): void {
+
+	fetch("/sports_rental_system/executive/api/equipment_dashboard.php", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(getFilter())
+	})
+		.then(res => res.json())
+		.then(result => {
+
+			updateKPI(result.kpi);
+
+			updatePopular(result.popular);
+			updateUsage(result.usage);
+			updateDamage(result.damage);
+			updateDamageTop(result.damage_top); // 🔥 ใหม่
+			updateRepair(result.repair);
+
+		})
+		.catch(err => console.error(err));
+}
+
+/* ==============================
+   KPI
+============================== */
+
+function updateKPI(kpi: any): void {
+
+	document.getElementById("kpiTotalEq")!.textContent =
+		Number(kpi?.total_equipment ?? 0).toLocaleString() + " ชิ้น";
+
+	document.getElementById("kpiUsedEq")!.textContent =
+		Number(kpi?.used_equipment ?? 0).toLocaleString() + " ชิ้น";
+
+	document.getElementById("kpiUsageRate")!.textContent =
+		Number(kpi?.usage_rate ?? 0).toFixed(2) + " %";
+
+	document.getElementById("kpiDamageRate")!.textContent =
+		Number(kpi?.damage_rate ?? 0).toFixed(2) + " %";
+}
+
+/* ==============================
+   UPDATE CHARTS
+============================== */
+
+function updatePopular(data: any): void {
+	popularChart.data.labels = data?.labels || [];
+	popularChart.data.datasets[0].data = data?.data || [];
+	popularChart.update();
+}
+
+function updateUsage(data: any): void {
+	usageChart.data.labels = data?.labels || [];
+	usageChart.data.datasets[0].data = data?.data || [];
+	usageChart.update();
+}
+
+function updateDamage(data: any): void {
+	damageChart.data.datasets[0].data = data?.data || [0, 0];
+	damageChart.update();
+}
+
+function updateDamageTop(data: any): void {
+	damageTopChart.data.labels = data?.labels || [];
+	damageTopChart.data.datasets[0].data = data?.data || [];
+	damageTopChart.update();
+}
+
+function updateRepair(data: any): void {
+	repairChart.data.labels = data?.labels || [];
+	repairChart.data.datasets[0].data = data?.data || [];
+	repairChart.update();
+}
+
+/* ==============================
+   DROPDOWN
+============================== */
+
+function loadRegions(): void {
+	fetch("/sports_rental_system/executive/api/get_regions.php")
+		.then(res => res.json())
+		.then(res => {
+
+			const select = document.getElementById("regionSelect") as HTMLSelectElement;
+			select.innerHTML = `<option value="">ทั้งหมด</option>`;
+
+			(res.data || []).forEach((r: any) => {
+				select.innerHTML += `<option value="${r.region_id}">${r.region_name}</option>`;
+			});
+		});
+}
+
+function loadProvinces(): void {
+
+	const regionId = (document.getElementById("regionSelect") as any)?.value || "";
+
+	fetch("/sports_rental_system/executive/api/get_provinces.php", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ region_id: regionId })
+	})
+		.then(res => res.json())
+		.then(res => {
+
+			const select = document.getElementById("provinceSelect") as HTMLSelectElement;
+			select.innerHTML = `<option value="">ทั้งหมด</option>`;
+
+			(res.data || []).forEach((p: any) => {
+				select.innerHTML += `<option value="${p.province_id}">${p.name}</option>`;
+			});
+		});
+}
+
+function loadBranches(): void {
+
+	const regionId = (document.getElementById("regionSelect") as any)?.value || "";
+	const provinceId = (document.getElementById("provinceSelect") as any)?.value || "";
+
+	fetch("/sports_rental_system/executive/api/get_branches.php", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			region_id: regionId,
+			province_id: provinceId
+		})
+	})
+		.then(res => res.json())
+		.then(res => {
+
+			const select = document.getElementById("branchSelect") as HTMLSelectElement;
+			select.innerHTML = `<option value="">ทั้งหมด</option>`;
+
+			(res.data || []).forEach((b: any) => {
+				select.innerHTML += `<option value="${b.branch_id}">${b.name}</option>`;
+			});
+		});
+}
+
+/* ==============================
+   INIT CHART
+============================== */
+
+function initCharts(): void {
+
+	popularChart = new Chart(document.getElementById("popularChart"), {
+		type: "bar",
+		data: {
+			labels: [],
+			datasets: [{
+				label: "จำนวนครั้งที่ใช้งาน",
+				data: [],
+				backgroundColor: "#3b82f6"
+			}]
+		}
+	});
+
+	usageChart = new Chart(document.getElementById("usageChart"), {
+		type: "line",
+		data: {
+			labels: [],
+			datasets: [{
+				label: "การใช้งาน",
+				data: [],
+				borderColor: "#22c55e",
+				fill: false
+			}]
+		}
+	});
+
+	damageChart = new Chart(document.getElementById("damageChart"), {
+		type: "doughnut",
+		data: {
+			labels: ["ปกติ", "เสียหาย"],
+			datasets: [{
+				data: [0, 0],
+				backgroundColor: ["#22c55e", "#ef4444"]
+			}]
+		}
+	});
+
+	damageTopChart = new Chart(document.getElementById("damageTopChart"), {
+		type: "bar",
+		data: {
+			labels: [],
+			datasets: [{
+				label: "จำนวนครั้งที่เสียหาย",
+				data: [],
+				backgroundColor: "#ef4444"
+			}]
+		}
+	});
+
+	repairChart = new Chart(document.getElementById("repairChart"), {
+		type: "bar",
+		data: {
+			labels: [],
+			datasets: [{
+				label: "จำนวนการซ่อม",
+				data: [],
+				backgroundColor: "#f97316"
+			}]
+		}
+	});
 }

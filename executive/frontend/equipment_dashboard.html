@@ -2,151 +2,152 @@
 <html lang="th">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Executive Dashboard - อุปกรณ์ & สนาม</title>
+	<meta charset="UTF-8">
+	<title>Equipment Dashboard</title>
 
-  <link rel="stylesheet" href="css/equipment_dashboard.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<link rel="stylesheet" href="css/index.css">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-  <header class="main-header">
+	<!-- HEADER -->
+	<header class="main-header">
 
-    <div class="header-top">
-      <div class="brand">
-        <span class="brand-name">ระบบเช่าอุปกรณ์กีฬา</span>
-        <small>Sports Equipment Rental System</small>
-      </div>
+		<div class="header-top">
+			<div class="brand">
+				<span class="brand-name">ระบบเช่าอุปกรณ์กีฬา</span>
+				<small>Sports Equipment Rental System</small>
+			</div>
 
-      <div>
-        <a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
-      </div>
-    </div>
+			<div class="staff-zone">
+				<a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+			</div>
+		</div>
 
-    <div class="header-bottom">
-      <nav class="main-nav">
-        <a href="index.html" class="nav-item">ภาพรวมอุปกรณ์</a>
-        <a href="user.html" class="nav-item">ผู้ใช้</a>
-        <a href="equipment_dashboard.html" class="nav-item active">สถานะอุปกรณ์</a>
-      </nav>
-    </div>
+		<div class="header-bottom">
+			<nav class="main-nav">
+				<a href="index.html" class="nav-item">Dashboard</a>
+				<a href="user.html" class="nav-item">ผู้ใช้</a>
+				<a href="equipment_dashboard.html" class="nav-item active">อุปกรณ์</a>
+			</nav>
+		</div>
 
-  </header>
+	</header>
 
-  <div class="container">
+	<div class="container">
 
-    <!-- ================= SIDEBAR ================= -->
-    <aside class="sidebar">
+		<!-- SIDEBAR -->
+		<aside class="sidebar">
 
-      <h3>ตัวกรองข้อมูล</h3>
+			<h3>ตัวกรองข้อมูล</h3>
 
-      <label>ช่วงเวลา</label>
-      <select id="rangeSelect">
-        <option value="7days">7 วัน</option>
-        <option value="30days" selected>30 วัน</option>
-        <option value="1year">1 ปี</option>
-        <option value="custom">กำหนดเอง</option>
-      </select>
+			<label>ช่วงเวลา</label>
+			<select id="rangeSelect">
+				<option value="7days">7 วัน</option>
+				<option value="30days" selected>30 วัน</option>
+				<option value="1year">1 ปี</option>
+				<option value="custom">กำหนดเอง</option>
+			</select>
 
-      <input type="date" id="startDate">
-      <input type="date" id="endDate">
+			<div id="customDateBox" class="custom-date" style="display:none;">
+				<input type="date" id="startDate">
+				<input type="date" id="endDate">
+			</div>
 
-      <label>ภูมิภาค</label>
-      <select id="regionSelect"></select>
+			<label>ภูมิภาค</label>
+			<select id="regionSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
 
-      <label>จังหวัด</label>
-      <select id="provinceSelect"></select>
+			<label>จังหวัด</label>
+			<select id="provinceSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
 
-      <label>สาขา</label>
-      <select id="branchSelect"></select>
+			<label>สาขา</label>
+			<select id="branchSelect">
+				<option value="">ทั้งหมด</option>
+			</select>
 
-      <label>หมวดหมู่</label>
-      <select id="categorySelect"></select>
+			<button id="resetFilter" class="btn-reset">รีเซ็ตตัวกรอง</button>
 
-      <label>ชื่ออุปกรณ์</label>
-      <select id="equipmentSelect"></select>
+		</aside>
 
-      <button class="btn-reset" id="resetFilter">รีเซ็ตตัวกรอง</button>
 
-    </aside>
+		<!-- MAIN -->
+		<main class="main">
 
-    <!-- ================= MAIN ================= -->
-    <main class="main">
+			<!-- KPI -->
+			<section class="kpi-grid">
 
-      <!-- KPI -->
-      <section class="kpi-grid">
+				<div class="kpi-card">
+					<div class="kpi-title">จำนวนอุปกรณ์ทั้งหมด</div>
+					<div class="kpi-value" id="kpiTotalEq">-</div>
+				</div>
 
-        <div class="kpi-card">
-          <div class="kpi-title">อุปกรณ์ทั้งหมด</div>
-          <div class="kpi-value" id="kpiEquipment">-</div>
-        </div>
+				<div class="kpi-card">
+					<div class="kpi-title">อุปกรณ์ที่ถูกใช้งาน</div>
+					<div class="kpi-value" id="kpiUsedEq">-</div>
+				</div>
 
-        <div class="kpi-card">
-          <div class="kpi-title">คะแนนเฉลี่ยอุปกรณ์</div>
-          <div class="kpi-value" id="kpiEquipRating">-</div>
-        </div>
+				<div class="kpi-card">
+					<div class="kpi-title">อัตราการใช้งาน (%)</div>
+					<div class="kpi-value" id="kpiUsageRate">-</div>
+				</div>
 
-        <div class="kpi-card">
-          <div class="kpi-title">สนามทั้งหมด</div>
-          <div class="kpi-value" id="kpiVenue">-</div>
-        </div>
+				<div class="kpi-card">
+					<div class="kpi-title">อัตราการเสียหาย (%)</div>
+					<div class="kpi-value" id="kpiDamageRate">-</div>
+				</div>
 
-        <div class="kpi-card">
-          <div class="kpi-title">คะแนนเฉลี่ยสนาม</div>
-          <div class="kpi-value" id="kpiVenueRating">-</div>
-        </div>
+			</section>
 
-      </section>
 
-      <!-- Equipment Rating -->
-      <section class="grid-2">
-        <div class="card">
-          <h3>⭐ Top 5 อุปกรณ์คะแนนดี</h3>
-          <canvas id="bestEquipmentChart"></canvas>
-        </div>
+			<!-- 🔥 ROW 1 -->
+			<section class="grid-2">
 
-        <div class="card">
-          <h3>🔻 Top 5 อุปกรณ์คะแนนแย่</h3>
-          <canvas id="worstEquipmentChart"></canvas>
-        </div>
-      </section>
+				<div class="card">
+					<h3>แนวโน้มการใช้งานอุปกรณ์</h3>
+					<canvas id="usageChart"></canvas>
+				</div>
 
-      <!-- Venue Rating -->
-      <section class="grid-2">
-        <div class="card">
-          <h3>⭐ Top 5 สนามคะแนนดี</h3>
-          <canvas id="bestVenueChart"></canvas>
-        </div>
+				<div class="card">
+					<h3>สถานะอุปกรณ์ (ปกติ / เสียหาย)</h3>
+					<canvas id="damageChart"></canvas>
+				</div>
 
-        <div class="card">
-          <h3>🔻 Top 5 สนามคะแนนแย่</h3>
-          <canvas id="worstVenueChart"></canvas>
-        </div>
-      </section>
+			</section>
 
-      <!-- Risk & Category -->
-      <section class="grid-2">
 
-        <div class="card">
-          <h3>⏳ ใกล้หมดอายุ (30 วัน)</h3>
-          <canvas id="expireChart"></canvas>
-        </div>
+			<!-- 🔥 ROW 2 -->
+			<section class="grid-2">
 
-        <div class="card">
-          <h3>🥧 หมวดหมู่ยอดนิยม</h3>
-          <canvas id="categoryChart"></canvas>
-        </div>
+				<div class="card">
+					<h3>อุปกรณ์ยอดนิยม (Top 5)</h3>
+					<canvas id="popularChart"></canvas>
+				</div>
 
-      </section>
+				<div class="card">
+					<h3>อุปกรณ์ที่เสียหายบ่อยที่สุด (Top 5)</h3>
+					<canvas id="damageTopChart"></canvas>
+				</div>
 
-    </main>
+			</section>
 
-  </div>
 
-  <script src="equipment_dashboard.js"></script>
+			<!-- 🔥 FULL WIDTH -->
+			<section class="card">
+				<h3>จำนวนการซ่อมแยกตามสาขา</h3>
+				<canvas id="repairChart"></canvas>
+			</section>
+
+		</main>
+
+	</div>
+
+	<script src="equipment_dashboard.js"></script>
 
 </body>
-
 </html>

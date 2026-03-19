@@ -1,0 +1,259 @@
+/* ================= RESET ================= */
+
+* {
+  box-sizing: border-box;
+  font-family: "Noto Sans Thai", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f3f5f9;
+  color: #111827;
+}
+
+/* ================= HEADER ================= */
+
+.main-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-top {
+  max-width: 1400px;
+  margin: auto;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-name {
+  color: #ff7a00;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.brand small {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.profile-btn {
+  background: #f3f4f6;
+  padding: 6px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #111827;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.profile-btn:hover {
+  background: #e5e7eb;
+}
+
+/* ================= NAV ================= */
+
+.header-bottom {
+  border-top: 1px solid #f0f0f0;
+}
+
+.main-nav {
+  max-width: 1400px;
+  margin: auto;
+  padding: 0 28px;
+  display: flex;
+  gap: 40px;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #4b5563;
+  padding: 14px 0;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+}
+
+.nav-item.active {
+  color: #ff7a00;
+  border-bottom: 2px solid #ff7a00;
+  font-weight: 600;
+}
+
+/* ================= LAYOUT ================= */
+
+.container {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 28px;
+  padding: 32px;
+  max-width: 1400px;
+  margin: auto;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+  background: #ffffff;
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.sidebar label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 10px;
+}
+
+.sidebar select,
+.sidebar input {
+  width: 100%;
+  padding: 9px;
+  margin-top: 4px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+  background: #fafafa;
+}
+
+.sidebar select:focus,
+.sidebar input:focus {
+  outline: none;
+  border-color: #ff7a00;
+}
+
+.btn-reset {
+  margin-top: 14px;
+  padding: 10px;
+  background: #ff7a00;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.btn-reset:hover {
+  background: #e66c00;
+}
+
+/* ================= SECTION TITLE ================= */
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* ================= KPI ================= */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 22px;
+}
+
+.kpi-card {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.05);
+  border-top: 3px solid #ff7a00;
+  transition: all .18s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-title {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 8px;
+  letter-spacing: .3px;
+}
+
+.kpi-value-wrapper {
+  display: flex;
+  align-items: baseline; 
+  justify-content: flex-start; 
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.kpi-main-number {
+  font-size: 2.2rem; 
+  font-weight: 800;
+  color: #111827;
+  line-height: 1;
+}
+
+.kpi-unit-label {
+  font-size: 1rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ================= CARDS ================= */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  margin-bottom: 0px;
+}
+
+.card {
+  background: white;
+  padding: 28px;
+  border-radius: 18px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.05);
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card canvas {
+  min-height: 220px !important;
+  max-height: 400px !important;
+}

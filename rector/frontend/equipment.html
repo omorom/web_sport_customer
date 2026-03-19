@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Rector Dashboard</title>
+
+	<link rel="stylesheet" href="css/equipment.css">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+	<header class="main-header">
+
+		<div class="header-top">
+
+			<div class="brand">
+				<span class="brand-name">ระบบเช่าอุปกรณ์กีฬา</span>
+				<small>Sports Equipment Rental System</small>
+			</div>
+
+			<div class="staff-zone">
+				<a href="profile.html" class="profile-btn">👤 โปรไฟล์</a>
+			</div>
+
+		</div>
+
+		<div class="header-bottom">
+			<nav class="main-nav">
+				<a href="index.html" class="nav-item">ภาพรวม</a>
+				<a href="equipment.html" class="nav-item active">อุปกรณ์</a>
+				<a href="customer.html" class="nav-item">ลูกค้า</a>
+			</nav>
+		</div>
+	</header>
+
+	<div class="container">
+
+		<!-- ================= SIDEBAR FILTER ================= -->
+		<div class="layout">
+
+			<!-- ================= SIDEBAR ================= -->
+			<aside class="sidebar">
+				<h3>ตัวกรองข้อมูล</h3>
+
+				<!-- เวลา -->
+				<label>ช่วงเวลา</label>
+				<select id="rangeSelect">
+					<option value="all" selected>ทั้งหมด</option>
+					<option value="7days">7 วันล่าสุด</option>
+					<option value="30days">30 วันล่าสุด</option>
+					<option value="1year">1 ปีล่าสุด</option>
+					<option value="custom">กำหนดเอง</option>
+				</select>
+
+				<div id="customDateBox" class="custom-date" style="display:none;">
+					<input type="date" id="startDate">
+					<input type="date" id="endDate">
+				</div>
+
+				<!-- รูปแบบการเช่า -->
+				<label>รูปแบบการเช่า</label>
+				<select id="bookingTypeSelect">
+					<option value="">ทั้งหมด</option>
+					<option value="1">ออนไลน์</option>
+					<option value="2">หน้าร้าน</option>
+				</select>
+
+				<label>ประเภทลูกค้า</label>
+				<select id="userTypeSelect">
+					<option value="">ทั้งหมด</option>
+					<option value="student">นิสิต/นักศึกษา</option>
+					<option value="general">บุคคลภายนอก</option>
+				</select>
+
+				<!-- คณะ -->
+				<label>คณะ</label>
+				<select id="facultySelect">
+					<option value="">ทั้งหมด</option>
+				</select>
+
+				<!-- ชั้นปี -->
+				<label>ชั้นปี</label>
+				<select id="yearSelect">
+					<option value="">ทั้งหมด</option>
+				</select>
+
+				<!-- หมวดหมู่ -->
+				<label>หมวดหมู่อุปกรณ์</label>
+				<select id="categorySelect">
+					<option value="">ทั้งหมด</option>
+				</select>
+
+				<button id="resetFilter" class="btn-reset">
+					รีเซ็ตตัวกรอง
+				</button>
+			</aside>
+
+			<!-- ================= MAIN ================= -->
+			<main class="main">
+
+				<!-- ================= KPI ================= -->
+				<section class="kpi-grid">
+					<div class="kpi-card">
+						<div class="kpi-title">อุปกรณ์ทั้งหมด</div>
+						<div class="kpi-value-wrapper">
+							<span class="kpi-main-number" id="kpiEquipment">0</span>
+							<span class="kpi-unit-label">ชิ้น</span>
+						</div>
+					</div>
+
+					<div class="kpi-card">
+						<div class="kpi-title">อัตราการใช้อุปกรณ์</div>
+						<div class="kpi-value-wrapper">
+							<span class="kpi-main-number" id="kpiEquipmentUtil">-</span>
+						</div>
+					</div>
+
+					<div class="kpi-card">
+						<div class="kpi-title">สนามทั้งหมด</div>
+						<div class="kpi-value-wrapper">
+							<span class="kpi-main-number" id="kpiVenue">0</span>
+							<span class="kpi-unit-label">สนาม</span>
+						</div>
+					</div>
+
+					<div class="kpi-card">
+						<div class="kpi-title">อัตราการใช้สนาม</div>
+						<div class="kpi-value-wrapper">
+							<span class="kpi-main-number" id="kpiVenueUtil">-</span>
+						</div>
+					</div>
+				</section>
+				<!-- ================= ROW 1 ================= -->
+				<section class="grid-2">
+
+					<div class="card">
+						<h3>Top 5 อุปกรณ์ยอดนิยม</h3>
+						<canvas id="topEquipmentChart"></canvas>
+					</div>
+
+					<div class="card">
+						<h3>Top 5 สนามยอดนิยม</h3>
+						<canvas id="topVenueChart"></canvas>
+					</div>
+				</section>
+
+				<!-- ================= ROW 2 ================= -->
+				<section class="card">
+					<h3>หมวดหมู่ยอดนิยมของแต่ละคณะ</h3>
+					<canvas id="categoryFacultyChart"></canvas>
+				</section>
+
+			</main>
+		</div>
+		<script src="equipment.js"></script>
+
+</body>
+
+</html>
