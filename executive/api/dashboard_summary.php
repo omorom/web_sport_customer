@@ -48,6 +48,28 @@ JOIN provinces p ON b.province_id = p.province_id
 JOIN region r ON p.region_id = r.region_id
 ";
 
+// 🔥 WHERE สำหรับ repair (แยกจาก booking)
+$whereRepair = [];
+
+if ($region_id)   $whereRepair[] = "r.region_id = '$region_id'";
+if ($province_id) $whereRepair[] = "p.province_id = '$province_id'";
+if ($branch_id)   $whereRepair[] = "ml.branch_id = '$branch_id'";
+
+
+$dateWhereRepair = "";
+// date filter (ใช้ report_date)
+if ($range === "7days")
+    $whereRepair[] = "ml.report_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+elseif ($range === "30days")
+    $whereRepair[] = "ml.report_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+elseif ($range === "1year")
+    $whereRepair[] = "ml.report_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR)";
+elseif ($range === "custom" && $start && $end)
+    $whereRepair[] = "DATE(ml.report_date) BETWEEN '$start' AND '$end'";
+
+$whereRepairSQL = $whereRepair ? "WHERE " . implode(" AND ", $whereRepair) : "";
+
+
 /* ==============================
    KPI (แยก query ชัด)
 ============================== */
@@ -97,34 +119,65 @@ $cancel_rate = ($total_done > 0)
     ? ($cancel["total_cancel"] * 100.0 / $total_done)
     : 0;
 
+// 🔹 repair cost (ค่าใช้จ่ายรวม)
+$sqlExpense = "
+SELECT COALESCE(SUM(ml.repair_cost),0) total_expense
+FROM maintenance_logs ml
+JOIN branches b ON ml.branch_id = b.branch_id
+JOIN provinces p ON b.province_id = p.province_id
+JOIN region r ON p.region_id = r.region_id
+$whereRepairSQL
+";
+
+$exp = $conn->query($sqlExpense)->fetch_assoc();
+
+$net_profit = $rev["total_revenue"] - $exp["total_expense"];
+
 /* ==============================
    TREND FINANCE
 ============================== */
 
+
+
+
 $sqlFinance = "
 SELECT 
-DATE(bk.pickup_time) d,
+    d,
+    SUM(revenue) AS revenue,
+    SUM(expense) AS expense,
+    SUM(revenue) - SUM(expense) AS profit
+FROM (
 
-COALESCE(SUM(CASE 
-    WHEN bk.booking_status_id = 5 THEN bk.net_amount 
-    ELSE 0 END),0) revenue,
+    -- 🔵 รายได้จาก booking
+    SELECT 
+        DATE(bk.pickup_time) AS d,
+        SUM(
+            CASE 
+                WHEN bk.booking_status_id = 5 THEN bk.net_amount 
+                ELSE 0 
+            END
+        ) AS revenue,
+        0 AS expense
+    FROM bookings bk
+    $join
+    $whereSQL
+    GROUP BY DATE(bk.pickup_time)
 
-COALESCE(SUM(
-    CASE 
-        WHEN bia.return_condition_id > 1 THEN bd.price_at_booking
-        ELSE 0
-    END
-),0) expense
+    UNION ALL
 
-FROM bookings bk
-LEFT JOIN booking_details bd 
-    ON bd.booking_id = bk.booking_id 
-    AND bd.item_type = 'Equipment'
-LEFT JOIN booking_item_assignments bia 
-    ON bd.detail_id = bia.detail_id
+    -- 🔴 ค่าใช้จ่ายจาก repair
+    SELECT 
+        DATE(ml.report_date) AS d,
+        0 AS revenue,
+        SUM(ml.repair_cost) AS expense
+    FROM maintenance_logs ml
+    JOIN branches b ON ml.branch_id = b.branch_id
+    JOIN provinces p ON b.province_id = p.province_id
+    JOIN region r ON p.region_id = r.region_id
+    $whereRepairSQL
+    GROUP BY DATE(ml.report_date)
 
-$join
-$whereSQL
+) t
 
 GROUP BY d
 ORDER BY d
@@ -132,20 +185,18 @@ ORDER BY d
 
 $resF = $conn->query($sqlFinance);
 
-$financeLabels=[]; 
-$financeRevenue=[]; 
-$financeExpense=[]; 
-$financeProfit=[];
+$financeLabels = [];
+$financeRevenue = [];
+$financeExpense = [];
+$financeProfit = [];
 
 while($row=$resF->fetch_assoc()){
-    $revv = (float)$row["revenue"];
-    $exp  = (float)$row["expense"];
-
-    $financeLabels[]  = $row["d"];
-    $financeRevenue[] = $revv;
-    $financeExpense[] = $exp;
-    $financeProfit[]  = $revv - $exp;
+    $financeLabels[] = $row["d"];
+    $financeRevenue[] = (float)$row["revenue"];
+    $financeExpense[] = (float)$row["expense"];
+    $financeProfit[]  = (float)$row["profit"];
 }
+
 
 /* ==============================
    BOOKING TREND
@@ -203,7 +254,7 @@ while($row=$resC->fetch_assoc()){
 $sqlRatio = "
 SELECT 
 CASE 
-    WHEN bk.booking_status_id = 5 THEN 'สำเร็จ'
+    WHEN bk.booking_status_id IN (2, 3, 4, 5) THEN 'สำเร็จ'
     WHEN bk.booking_status_id = 6 THEN 'ยกเลิก'
     ELSE 'รอดำเนินการ'
 END AS status,
@@ -306,6 +357,8 @@ echo json_encode([
     "kpi"=>[
         "total_bookings" => (int)$total["total"],
         "total_revenue"  => (float)$rev["total_revenue"],
+        "total_expense"  => (float)$exp["total_expense"],   // ✅ เพิ่ม
+        "net_profit"     => (float)$net_profit,             // ✅ เพิ่ม
         "revenue_per_booking" => round($avg_revenue,2),
         "cancellation_rate"   => round($cancel_rate,2)
     ],

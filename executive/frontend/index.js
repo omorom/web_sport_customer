@@ -104,7 +104,7 @@ function loadAll() {
      KPI
 ============================== */
 function updateKPI(kpi) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e, _f;
     document.getElementById("kpiBookings").textContent =
         Number((_a = kpi === null || kpi === void 0 ? void 0 : kpi.total_bookings) !== null && _a !== void 0 ? _a : 0).toLocaleString() + " รายการ";
     document.getElementById("kpiRevenue").textContent =
@@ -114,6 +114,10 @@ function updateKPI(kpi) {
             .toLocaleString(undefined, { maximumFractionDigits: 2 }) + " บาท/ครั้ง";
     document.getElementById("kpiCancel").textContent =
         Number((_d = kpi === null || kpi === void 0 ? void 0 : kpi.cancellation_rate) !== null && _d !== void 0 ? _d : 0).toFixed(2) + " %";
+    document.getElementById("kpiExpense").textContent =
+        Number((_e = kpi === null || kpi === void 0 ? void 0 : kpi.total_expense) !== null && _e !== void 0 ? _e : 0).toLocaleString() + " บาท";
+    document.getElementById("kpiProfit").textContent =
+        Number((_f = kpi === null || kpi === void 0 ? void 0 : kpi.net_profit) !== null && _f !== void 0 ? _f : 0).toLocaleString() + " บาท";
 }
 /* ==============================
      UPDATE CHARTS

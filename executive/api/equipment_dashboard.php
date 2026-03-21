@@ -14,7 +14,7 @@ $start       = $data["start"] ?? "";
 $end         = $data["end"] ?? "";
 
 /* ==============================
-   DATE FILTER
+   DATE FILTER (BOOKING)
 ============================== */
 
 $dateWhere = "";
@@ -33,7 +33,26 @@ elseif ($range === "custom" && $start && $end) {
 }
 
 /* ==============================
-   BASE FILTER
+   DATE FILTER (REPAIR)
+============================== */
+
+$dateWhereRepair = "";
+
+if ($range === "7days") {
+    $dateWhereRepair = "AND ml.report_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+}
+elseif ($range === "30days") {
+    $dateWhereRepair = "AND ml.report_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+}
+elseif ($range === "1year") {
+    $dateWhereRepair = "AND ml.report_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR)";
+}
+elseif ($range === "custom" && $start && $end) {
+    $dateWhereRepair = "AND DATE(ml.report_date) BETWEEN '$start' AND '$end'";
+}
+
+/* ==============================
+   FILTER
 ============================== */
 
 $filterJoin = "";
@@ -60,6 +79,7 @@ function getOne($conn, $sql) {
    KPI
 ============================== */
 
+// total equipment
 $sqlTotal = "
 SELECT COUNT(*) total
 FROM equipment_instances ei
@@ -73,6 +93,7 @@ WHERE 1=1
 
 $total = getOne($conn, $sqlTotal);
 
+// used
 $sqlUsed = "
 SELECT COUNT(*) used
 FROM booking_details bd
@@ -90,7 +111,7 @@ $usage_rate = ($total["total"] > 0)
     ? ($used["used"] * 100.0 / $total["total"])
     : 0;
 
-/* DAMAGE RATE (แก้ให้ filter แล้ว) */
+// damage rate
 $sqlDamage = "
 SELECT 
 SUM(CASE WHEN bia.return_condition_id > 1 THEN 1 ELSE 0 END) * 100.0 
@@ -107,6 +128,21 @@ $filterJoin
 
 $damage = getOne($conn, $sqlDamage);
 
+// repair KPI (ของจริง)
+$sqlRepairKPI = "
+SELECT COALESCE(SUM(ml.repair_cost),0) AS total_repair_cost
+FROM maintenance_logs ml
+JOIN branches b ON ml.branch_id = b.branch_id
+JOIN provinces p ON b.province_id = p.province_id
+WHERE 1=1
+$dateWhereRepair
+"
+. ($branch_id ? "AND ml.branch_id = '$branch_id'" : "")
+. ($province_id ? "AND b.province_id = '$province_id'" : "")
+. ($region_id ? "AND p.region_id = '$region_id'" : "");
+
+$repairKPI = getOne($conn, $sqlRepairKPI);
+
 /* ==============================
    POPULAR
 ============================== */
@@ -120,11 +156,9 @@ JOIN bookings bk ON bd.booking_id = bk.booking_id
 JOIN equipment_master e ON bd.equipment_id = e.equipment_id
 JOIN branches b ON bk.branch_id = b.branch_id
 JOIN provinces p ON b.province_id = p.province_id
-
 WHERE bd.item_type = 'Equipment'
 $dateWhere
 $filterJoin
-
 GROUP BY e.name
 ORDER BY total DESC
 LIMIT 5
@@ -141,40 +175,20 @@ while($row=$resP->fetch_assoc()){
 }
 
 /* ==============================
-   USAGE TREND
+   TREND BOOKING
 ============================== */
 
 $sqlTrend = "
 SELECT 
     DATE(bk.pickup_time) d,
-
     COUNT(*) AS bookings,
-
-    SUM(bk.net_amount) AS revenue,
-
-    SUM(
-        CASE 
-            WHEN bia.return_condition_id > 1 THEN bd.price_at_booking
-            ELSE 0
-        END
-    ) AS expense
-
+    SUM(bk.net_amount) AS revenue
 FROM bookings bk
-
-LEFT JOIN booking_details bd 
-    ON bd.booking_id = bk.booking_id 
-    AND bd.item_type = 'Equipment'
-
-LEFT JOIN booking_item_assignments bia 
-    ON bd.detail_id = bia.detail_id
-
 JOIN branches b ON bk.branch_id = b.branch_id
 JOIN provinces p ON b.province_id = p.province_id
-
 WHERE 1=1
 $dateWhere
 $filterJoin
-
 GROUP BY d
 ORDER BY d
 ";
@@ -184,17 +198,42 @@ $resT = $conn->query($sqlTrend);
 $trendLabels=[]; 
 $trendBookings=[];
 $trendRevenue=[];
-$trendExpense=[];
 
 while($row=$resT->fetch_assoc()){
     $trendLabels[]   = $row["d"];
     $trendBookings[] = (int)$row["bookings"];
     $trendRevenue[]  = (float)$row["revenue"];
-    $trendExpense[]  = (float)$row["expense"];
 }
 
 /* ==============================
-   DAMAGE PIE (แก้ให้ filter แล้ว)
+   TREND REPAIR
+============================== */
+
+$sqlTrendRepair = "
+SELECT 
+    DATE(ml.report_date) d,
+    SUM(ml.repair_cost) AS expense
+FROM maintenance_logs ml
+JOIN branches b ON ml.branch_id = b.branch_id
+JOIN provinces p ON b.province_id = p.province_id
+WHERE 1=1
+$dateWhereRepair
+GROUP BY d
+ORDER BY d
+";
+
+$resTR = $conn->query($sqlTrendRepair);
+
+$repairTrendLabels=[]; 
+$repairTrendData=[];
+
+while($row=$resTR->fetch_assoc()){
+    $repairTrendLabels[] = $row["d"];
+    $repairTrendData[]   = (float)$row["expense"];
+}
+
+/* ==============================
+   DAMAGE PIE
 ============================== */
 
 $sqlDamageChart = "
@@ -214,7 +253,7 @@ $filterJoin
 $damageChart = getOne($conn, $sqlDamageChart);
 
 /* ==============================
-   DAMAGE TOP (แก้ให้ filter แล้ว)
+   DAMAGE TOP
 ============================== */
 
 $sqlDamageTop = "
@@ -227,11 +266,9 @@ JOIN bookings bk ON bd.booking_id = bk.booking_id
 JOIN equipment_master e ON bd.equipment_id = e.equipment_id
 JOIN branches b ON bk.branch_id = b.branch_id
 JOIN provinces p ON b.province_id = p.province_id
-
 WHERE bia.return_condition_id > 1
 $dateWhere
 $filterJoin
-
 GROUP BY e.name
 ORDER BY total DESC
 LIMIT 5
@@ -248,36 +285,23 @@ while($row=$resD->fetch_assoc()){
 }
 
 /* ==============================
-   REPAIR (ค่าใช้จ่าย + filter ครบ)
+   REPAIR BY BRANCH
 ============================== */
 
 $sqlRepair = "
 SELECT 
     b.name,
-    COALESCE(SUM(
-        CASE 
-            WHEN bia.return_condition_id > 1 THEN bd.price_at_booking
-            ELSE 0 
-        END
-    ),0) AS total_cost
-
+    COALESCE(SUM(ml.repair_cost),0) AS total_cost
 FROM branches b
-LEFT JOIN bookings bk 
-    ON bk.branch_id = b.branch_id
-    $dateWhere
-LEFT JOIN booking_details bd 
-    ON bd.booking_id = bk.booking_id 
-    AND bd.item_type = 'Equipment'
-LEFT JOIN booking_item_assignments bia 
-    ON bd.detail_id = bia.detail_id
+LEFT JOIN maintenance_logs ml 
+    ON ml.branch_id = b.branch_id
+    $dateWhereRepair
 JOIN provinces p ON b.province_id = p.province_id
-
 WHERE 1=1
 "
 . ($branch_id ? "AND b.branch_id = '$branch_id'" : "")
 . ($province_id ? "AND b.province_id = '$province_id'" : "")
 . ($region_id ? "AND p.region_id = '$region_id'" : "") . "
-
 GROUP BY b.branch_id, b.name
 ORDER BY total_cost DESC
 ";
@@ -301,7 +325,8 @@ echo json_encode([
         "total_equipment" => (int)$total["total"],
         "used_equipment"  => (int)$used["used"],
         "usage_rate"      => round($usage_rate,2),
-        "damage_rate"     => round((float)$damage["damage_rate"],2)
+        "damage_rate"     => round((float)$damage["damage_rate"],2),
+        "repair_cost"     => (float)$repairKPI["total_repair_cost"]
     ],
     "popular"=>[
         "labels"=>$popLabels,
@@ -311,19 +336,13 @@ echo json_encode([
         "labels"=>$trendLabels,
         "data"=>$trendBookings
     ],
-
     "trend_revenue"=>[
         "labels"=>$trendLabels,
         "data"=>$trendRevenue
     ],
-
-    "trend_finance"=>[
-        "labels"=>$trendLabels,
-        "revenue"=>$trendRevenue,
-        "expense"=>$trendExpense,
-        "profit"=>array_map(function($r,$e){
-            return $r - $e;
-        }, $trendRevenue, $trendExpense)
+    "trend_repair"=>[
+        "labels"=>$repairTrendLabels,
+        "data"=>$repairTrendData
     ],
     "damage"=>[
         "data"=>[

@@ -101,7 +101,7 @@ function loadAll() {
    KPI
 ============================== */
 function updateKPI(kpi) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     document.getElementById("kpiTotalEq").textContent =
         Number((_a = kpi === null || kpi === void 0 ? void 0 : kpi.total_equipment) !== null && _a !== void 0 ? _a : 0).toLocaleString() + " ชิ้น";
     document.getElementById("kpiUsedEq").textContent =
@@ -110,6 +110,8 @@ function updateKPI(kpi) {
         Number((_c = kpi === null || kpi === void 0 ? void 0 : kpi.usage_rate) !== null && _c !== void 0 ? _c : 0).toFixed(2) + " %";
     document.getElementById("kpiDamageRate").textContent =
         Number((_d = kpi === null || kpi === void 0 ? void 0 : kpi.damage_rate) !== null && _d !== void 0 ? _d : 0).toFixed(2) + " %";
+    document.getElementById("kpiRepairCost").textContent =
+        Number((_e = kpi === null || kpi === void 0 ? void 0 : kpi.repair_cost) !== null && _e !== void 0 ? _e : 0).toLocaleString() + " บาท";
 }
 /* ==============================
    UPDATE CHARTS

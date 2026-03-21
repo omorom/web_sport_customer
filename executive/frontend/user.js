@@ -378,7 +378,7 @@ function initCharts() {
         data: {
             labels: ["ใช้งานน้อย", "ปานกลาง", "สูง"],
             datasets: [{
-                    label: "จำนวนลูกค้า",
+                    label: "จำนวนการใช้งาน",
                     data: [],
                     backgroundColor: ["#b0cdff", "#4588fb", "#005bf9"]
                 }]
@@ -391,7 +391,7 @@ function initCharts() {
         data: {
             labels: [],
             datasets: [{
-                    labels: ["บุคคลทั่วไป", "นิสิต/นักศึกษา"],
+                    label: "รายได้",
                     data: [],
                     backgroundColor: ["#6366f1", "#f59e0b"]
                 }]

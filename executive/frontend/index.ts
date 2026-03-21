@@ -138,6 +138,13 @@ function updateKPI(kpi: any): void {
 
 	document.getElementById("kpiCancel")!.textContent =
 		Number(kpi?.cancellation_rate ?? 0).toFixed(2) + " %";
+
+	document.getElementById("kpiExpense")!.textContent =
+		Number(kpi?.total_expense ?? 0).toLocaleString() + " บาท";
+
+	document.getElementById("kpiProfit")!.textContent =
+		Number(kpi?.net_profit ?? 0).toLocaleString() + " บาท";
+
 }
 
 /* ==============================

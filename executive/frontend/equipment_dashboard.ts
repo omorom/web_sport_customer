@@ -144,6 +144,9 @@ function updateKPI(kpi: any): void {
 
 	document.getElementById("kpiDamageRate")!.textContent =
 		Number(kpi?.damage_rate ?? 0).toFixed(2) + " %";
+
+	document.getElementById("kpiRepairCost")!.textContent =
+	Number(kpi?.repair_cost ?? 0).toLocaleString() + " บาท";
 }
 
 /* ==============================
@@ -178,6 +181,7 @@ function updateRepair(data: any): void {
 	repairChart.data.datasets[0].data = data?.data || [];
 	repairChart.update();
 }
+
 
 /* ==============================
    DROPDOWN
