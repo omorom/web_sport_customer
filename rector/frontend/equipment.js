@@ -351,7 +351,7 @@ function stackedOptions() {
                 beginAtZero: true,
                 ticks: {
                     stepSize: 1,
-                    callback: function (v) { return v + " คน"; }
+                    callback: function (v) { return v + " ชิ้น"; }
                 }
             }
         }
