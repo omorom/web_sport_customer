@@ -114,9 +114,16 @@ $avg_revenue = ($success["total_success"] > 0)
     : 0;
 
 // 🔹 cancel rate (เฉพาะที่จบแล้ว)
-$total_done = $success["total_success"] + $cancel["total_cancel"];
-$cancel_rate = ($total_done > 0)
-    ? ($cancel["total_cancel"] * 100.0 / $total_done)
+
+$total = $conn->query("
+SELECT COUNT(*) total
+FROM bookings bk
+$join
+$whereSQL
+")->fetch_assoc();
+
+$cancel_rate = ($total["total"] > 0)
+    ? ($cancel["total_cancel"] / $total["total"]) * 100
     : 0;
 
 // 🔹 repair cost (ค่าใช้จ่ายรวม)
@@ -136,8 +143,6 @@ $net_profit = $rev["total_revenue"] - $exp["total_expense"];
 /* ==============================
    TREND FINANCE
 ============================== */
-
-
 
 
 $sqlFinance = "
